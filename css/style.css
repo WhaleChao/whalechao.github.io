@@ -384,18 +384,21 @@ img {
     margin-bottom: 40px;
 }
 .case-types-title {
-    text-align: center;
+    text-align: left;
     font-size: 1rem;
     color: var(--text-light);
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     letter-spacing: 0.05em;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 .cases-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    justify-content: center;
+    justify-content: flex-start;
     max-width: 800px;
     margin: 0 auto;
 }
@@ -428,14 +431,14 @@ img {
 .case-tag.cat-admin .case-count { background: #d1fae5; color: #065f46; }
 .case-tag.cat-const .case-count { background: #ede9fe; color: #5b21b6; }
 .courts-section {
-    max-width: 700px;
+    max-width: 800px;
     margin: 0 auto;
 }
 .courts-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    justify-content: center;
+    justify-content: flex-start;
 }
 .court-item {
     display: inline-flex;

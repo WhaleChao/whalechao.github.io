@@ -147,9 +147,14 @@ function renderCases(cases) {
         return;
     }
 
-    // Filter out non-case-reasons & sort by count
+    // Filter out non-case-reasons, sort by category then count
     const filtered = cases.filter(c => !['訴訟救助', '聲請復權'].includes(c.type));
-    const sorted = [...filtered].sort((a, b) => (b.count || 0) - (a.count || 0));
+    const catOrder = {'民事': 0, '刑事': 1, '行政': 2, '憲法': 3};
+    const sorted = [...filtered].sort((a, b) => {
+        const catDiff = (catOrder[a.category] ?? 9) - (catOrder[b.category] ?? 9);
+        if (catDiff !== 0) return catDiff;
+        return (b.count || 0) - (a.count || 0);
+    });
 
     const catClass = (cat) => {
         if (!cat) return '';
