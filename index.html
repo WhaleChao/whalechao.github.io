@@ -18,243 +18,189 @@
 </head>
 <body>
 
-    <!-- Navigation -->
-    <nav class="navbar" id="navbar">
-        <div class="nav-container">
-            <a href="#hero" class="nav-logo">喬政翔律師</a>
-            <button class="nav-toggle" id="navToggle" aria-label="切換選單">
-                <span></span><span></span><span></span>
-            </button>
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="#about">關於我</a></li>
-                <li><a href="#expertise">專長領域</a></li>
-                <li><a href="#stats">服務實績</a></li>
-                <li><a href="#cases">承辦案件</a></li>
-                <li><a href="#news">媒體報導</a></li>
-                <li><a href="#articles">發表文章</a></li>
-                <li><a href="#contact">聯繫方式</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero" id="hero">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-avatar">
-                    <img src="assets/profile.jpg" alt="喬政翔律師" class="avatar-img" id="avatarImg" onerror="this.style.display='none'; document.getElementById('avatarPlaceholder').style.display='flex';">
-                    <div class="avatar-placeholder" id="avatarPlaceholder" style="display:none;">喬</div>
-                </div>
-                <div class="hero-text">
-                    <h1>喬政翔<span class="title-suffix">律師</span></h1>
-                    <p class="hero-subtitle">偵理法律事務所</p>
-                    <p class="hero-tagline">扎根花蓮，致力於公義的法律實踐</p>
-                    <div class="hero-badges">
-                        <span class="badge">刑事辯護</span>
-                        <span class="badge">民事訴訟</span>
-                        <span class="badge">行政爭訟</span>
-                        <span class="badge">消費者債務清理</span>
-                    </div>
-                </div>
+    <!-- Hero Header (always visible) -->
+    <header class="hero-header" id="hero">
+        <div class="hero-inner">
+            <img src="assets/profile.jpg" alt="喬政翔律師" class="hero-photo" id="avatarImg"
+                 onerror="this.style.display='none'; document.getElementById('avatarPlaceholder').style.display='flex';">
+            <div class="hero-placeholder" id="avatarPlaceholder" style="display:none;">喬</div>
+            <div class="hero-info">
+                <h1>喬政翔<span class="hero-title-sub">律師</span></h1>
+                <p class="hero-firm">偵理法律事務所</p>
+                <p class="hero-tagline">扎根花蓮，致力於公義的法律實踐</p>
             </div>
         </div>
-    </section>
+    </header>
 
-    <!-- About Section -->
-    <section class="section" id="about">
-        <div class="container">
-            <h2 class="section-title">關於我</h2>
-            <div class="about-content">
-                <p>
+    <!-- Tab Navigation -->
+    <nav class="tab-nav" id="tabNav">
+        <button class="tab-btn active" data-tab="about">關於</button>
+        <button class="tab-btn" data-tab="cases">案件實績</button>
+        <button class="tab-btn" data-tab="news">報導</button>
+        <button class="tab-btn" data-tab="contact">聯繫</button>
+    </nav>
+
+    <!-- Tab Content -->
+    <main class="tab-content">
+
+        <!-- Tab: 關於 -->
+        <div class="tab-pane active" id="tab-about">
+            <div class="pane-section">
+                <p class="about-text">
                     喬政翔律師，偵理法律事務所主持律師，執業於花蓮與台北。長期投入司法改革運動，並積極參與法律扶助工作，為弱勢族群提供法律服務。專長涵蓋刑事辯護、民事訴訟、行政爭訟及消費者債務清理等領域，以嚴謹的法律分析與溫暖的人文關懷，為每一位當事人爭取最大的權益保障。
                 </p>
             </div>
-        </div>
-    </section>
 
-    <!-- Expertise Section -->
-    <section class="section section-alt" id="expertise">
-        <div class="container">
-            <h2 class="section-title">專長領域</h2>
-            <div class="expertise-list">
-                <div class="expertise-row">
-                    <div class="expertise-dot" style="background:#dc2626;"></div>
-                    <div class="expertise-info">
-                        <h3>刑事辯護</h3>
-                        <p>偵查程序陪訊、刑事審判辯護、上訴救濟、非常救濟程序，全程守護當事人權益。</p>
+            <div class="pane-section">
+                <h2 class="pane-title">專長領域</h2>
+                <div class="expertise-list">
+                    <div class="expertise-row">
+                        <div class="expertise-dot" style="background:#dc2626;"></div>
+                        <div class="expertise-info">
+                            <h3>刑事辯護</h3>
+                            <p>偵查程序陪訊、刑事審判辯護、上訴救濟、非常救濟程序，全程守護當事人權益。</p>
+                        </div>
+                    </div>
+                    <div class="expertise-row">
+                        <div class="expertise-dot" style="background:#2563eb;"></div>
+                        <div class="expertise-info">
+                            <h3>民事訴訟</h3>
+                            <p>契約糾紛、損害賠償、不動產爭議、勞資爭議、家事事件等各類民事案件。</p>
+                        </div>
+                    </div>
+                    <div class="expertise-row">
+                        <div class="expertise-dot" style="background:#059669;"></div>
+                        <div class="expertise-info">
+                            <h3>行政爭訟</h3>
+                            <p>訴願、行政訴訟、國家賠償，協助民眾對抗不當行政處分。</p>
+                        </div>
+                    </div>
+                    <div class="expertise-row">
+                        <div class="expertise-dot" style="background:#7c3aed;"></div>
+                        <div class="expertise-info">
+                            <h3>消費者債務清理</h3>
+                            <p>前置協商、更生、清算程序，協助債務人重建經濟生活。</p>
+                        </div>
                     </div>
                 </div>
-                <div class="expertise-row">
-                    <div class="expertise-dot" style="background:#2563eb;"></div>
-                    <div class="expertise-info">
-                        <h3>民事訴訟</h3>
-                        <p>契約糾紛、損害賠償、不動產爭議、勞資爭議、家事事件等各類民事案件。</p>
+            </div>
+
+            <div class="pane-section">
+                <h2 class="pane-title">服務實績</h2>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-num" data-field="totalCases">--</div>
+                        <div class="stat-lbl">累計案件</div>
                     </div>
-                </div>
-                <div class="expertise-row">
-                    <div class="expertise-dot" style="background:#059669;"></div>
-                    <div class="expertise-info">
-                        <h3>行政爭訟</h3>
-                        <p>訴願、行政訴訟、國家賠償，協助民眾對抗不當行政處分。</p>
+                    <div class="stat-item">
+                        <div class="stat-num" data-field="legalAidCases">--</div>
+                        <div class="stat-lbl">法律扶助</div>
                     </div>
-                </div>
-                <div class="expertise-row">
-                    <div class="expertise-dot" style="background:#7c3aed;"></div>
-                    <div class="expertise-info">
-                        <h3>消費者債務清理</h3>
-                        <p>前置協商、更生、清算程序，協助債務人重建經濟生活。</p>
+                    <div class="stat-item">
+                        <div class="stat-num" data-field="yearsOfPractice">--</div>
+                        <div class="stat-lbl">執業年數</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num" data-field="judgments">--</div>
+                        <div class="stat-lbl">公開判決</div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Stats Section -->
-    <section class="section" id="stats">
-        <div class="container">
-            <h2 class="section-title">服務實績</h2>
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-card">
-                    <div class="stat-number" data-field="totalCases">--</div>
-                    <div class="stat-label">累計案件</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" data-field="legalAidCases">--</div>
-                    <div class="stat-label">法律扶助案件</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" data-field="yearsOfPractice">--</div>
-                    <div class="stat-label">執業年數</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" data-field="judgments">--</div>
-                    <div class="stat-label">公開判決</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Cases Section -->
-    <section class="section section-alt" id="cases">
-        <div class="container">
-            <h2 class="section-title">承辦案件實績</h2>
-            <p class="cases-subtitle" id="casesSubtitle">司法院裁判書系統公開判決統計</p>
-
-            <!-- 四大類別統計 -->
-            <div class="case-categories" id="caseCategories">
-                <div class="case-cat" data-cat="civil">
-                    <div class="case-cat-number" id="catCivil">--</div>
-                    <div class="case-cat-label">民事案件</div>
-                </div>
-                <div class="case-cat" data-cat="criminal">
-                    <div class="case-cat-number" id="catCriminal">--</div>
-                    <div class="case-cat-label">刑事案件</div>
-                </div>
-                <div class="case-cat" data-cat="admin">
-                    <div class="case-cat-number" id="catAdmin">--</div>
-                    <div class="case-cat-label">行政案件</div>
-                </div>
-                <div class="case-cat" data-cat="const">
-                    <div class="case-cat-number" id="catConst">--</div>
-                    <div class="case-cat-label">憲法案件</div>
+        <!-- Tab: 案件實績 -->
+        <div class="tab-pane" id="tab-cases">
+            <div class="pane-section">
+                <p class="cases-subtitle" id="casesSubtitle">司法院裁判書系統公開判決統計</p>
+                <div class="case-categories" id="caseCategories">
+                    <div class="case-cat" data-cat="civil">
+                        <div class="case-cat-number" id="catCivil">--</div>
+                        <div class="case-cat-label">民事</div>
+                    </div>
+                    <div class="case-cat" data-cat="criminal">
+                        <div class="case-cat-number" id="catCriminal">--</div>
+                        <div class="case-cat-label">刑事</div>
+                    </div>
+                    <div class="case-cat" data-cat="admin">
+                        <div class="case-cat-number" id="catAdmin">--</div>
+                        <div class="case-cat-label">行政</div>
+                    </div>
+                    <div class="case-cat" data-cat="const">
+                        <div class="case-cat-number" id="catConst">--</div>
+                        <div class="case-cat-label">憲法</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 案由類型標籤 -->
-            <div class="case-types-section">
-                <h3 class="case-types-title">案由類型</h3>
+            <div class="pane-section">
+                <h2 class="pane-title">案由類型</h2>
                 <div class="cases-grid" id="casesGrid">
                     <p class="loading-text">載入中...</p>
                 </div>
             </div>
 
-            <!-- 承辦法院分布 -->
-            <div class="courts-section" id="courtsSection">
-                <h3 class="case-types-title">承辦法院分布</h3>
+            <div class="pane-section">
+                <h2 class="pane-title">承辦法院</h2>
                 <div class="courts-grid" id="courtsGrid"></div>
             </div>
         </div>
-    </section>
 
-    <!-- News Section -->
-    <section class="section" id="news">
-        <div class="container">
-            <h2 class="section-title">媒體報導</h2>
-            <div class="news-list" id="newsList">
-                <p class="loading-text">載入中...</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Articles Section -->
-    <section class="section" id="articles">
-        <div class="container">
-            <h2 class="section-title">發表文章</h2>
-            <div class="articles-list" id="articlesList">
-                <p class="loading-text">載入中...</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section class="section section-alt" id="contact">
-        <div class="container">
-            <h2 class="section-title">聯繫方式</h2>
-            <div class="contact-grid">
-                <div class="contact-info">
-                    <h3>偵理法律事務所</h3>
-                    <div class="contact-item">
-                        <span class="contact-icon">&#128222;</span>
-                        <div>
-                            <strong>電話</strong>
-                            <a href="tel:03-835-7186">03-835-7186</a>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-icon">&#128224;</span>
-                        <div>
-                            <strong>傳真</strong>
-                            <span>03-835-7135</span>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-icon">&#9993;</span>
-                        <div>
-                            <strong>Email</strong>
-                            <a href="mailto:zl.hualien@gmail.com">zl.hualien@gmail.com</a>
-                            <br>
-                            <a href="mailto:whalelawyer@gmail.com">whalelawyer@gmail.com</a>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-icon">&#128205;</span>
-                        <div>
-                            <strong>地址</strong>
-                            <span>花蓮縣花蓮市明禮路18-6號1樓</span>
-                        </div>
-                    </div>
+        <!-- Tab: 報導 -->
+        <div class="tab-pane" id="tab-news">
+            <div class="pane-section">
+                <h2 class="pane-title">媒體報導</h2>
+                <div class="news-list" id="newsList">
+                    <p class="loading-text">載入中...</p>
                 </div>
-                <div class="contact-line">
-                    <h3>LINE 諮詢</h3>
-                    <p class="line-hint">掃描 QR Code 或搜尋 ID：<strong>0937753800</strong></p>
-                    <div class="qrcode-container" id="qrcode"></div>
-                    <a href="https://line.me/ti/p/~0937753800" class="line-button" target="_blank" rel="noopener">
-                        加入 LINE 好友
-                    </a>
+            </div>
+            <div class="pane-section" id="articles">
+                <h2 class="pane-title">發表文章</h2>
+                <div class="articles-list" id="articlesList">
+                    <p class="loading-text">載入中...</p>
                 </div>
             </div>
         </div>
-    </section>
+
+        <!-- Tab: 聯繫 -->
+        <div class="tab-pane" id="tab-contact">
+            <div class="pane-section">
+                <div class="contact-layout">
+                    <div class="contact-info">
+                        <h2 class="pane-title">偵理法律事務所</h2>
+                        <div class="contact-item">
+                            <span class="ci-icon">&#128222;</span>
+                            <div><strong>電話</strong><a href="tel:03-835-7186">03-835-7186</a></div>
+                        </div>
+                        <div class="contact-item">
+                            <span class="ci-icon">&#128224;</span>
+                            <div><strong>傳真</strong><span>03-835-7135</span></div>
+                        </div>
+                        <div class="contact-item">
+                            <span class="ci-icon">&#9993;</span>
+                            <div><strong>Email</strong><a href="mailto:zl.hualien@gmail.com">zl.hualien@gmail.com</a><br><a href="mailto:whalelawyer@gmail.com">whalelawyer@gmail.com</a></div>
+                        </div>
+                        <div class="contact-item">
+                            <span class="ci-icon">&#128205;</span>
+                            <div><strong>地址</strong><span>花蓮縣花蓮市明禮路18-6號1樓</span></div>
+                        </div>
+                    </div>
+                    <div class="contact-line">
+                        <h2 class="pane-title">LINE 諮詢</h2>
+                        <p class="line-hint">掃描 QR Code 或搜尋 ID：<strong>0937753800</strong></p>
+                        <div class="qrcode-container" id="qrcode"></div>
+                        <a href="https://line.me/ti/p/~0937753800" class="line-button" target="_blank" rel="noopener">加入 LINE 好友</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <p>&copy; <span id="currentYear">2026</span> 喬政翔律師 | 偵理法律事務所</p>
-            <p class="footer-update">資料最後更新：<span id="lastUpdated">--</span></p>
-        </div>
+        <p>&copy; <span id="currentYear">2026</span> 喬政翔律師 | 偵理法律事務所</p>
+        <p class="footer-update">資料最後更新：<span id="lastUpdated">--</span></p>
     </footer>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="js/main.js"></script>
 </body>
