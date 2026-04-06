@@ -29,6 +29,7 @@
                 <li><a href="#about">關於我</a></li>
                 <li><a href="#expertise">專長領域</a></li>
                 <li><a href="#stats">服務實績</a></li>
+                <li><a href="#cases">承辦案件</a></li>
                 <li><a href="#news">媒體報導</a></li>
                 <li><a href="#articles">發表文章</a></li>
                 <li><a href="#contact">聯繫方式</a></li>
@@ -41,8 +42,8 @@
         <div class="container">
             <div class="hero-content">
                 <div class="hero-avatar">
-                    <div class="avatar-placeholder" id="avatarPlaceholder">喬</div>
                     <img src="assets/profile.jpg" alt="喬政翔律師" class="avatar-img" id="avatarImg" onerror="this.style.display='none'; document.getElementById('avatarPlaceholder').style.display='flex';">
+                    <div class="avatar-placeholder" id="avatarPlaceholder" style="display:none;">喬</div>
                 </div>
                 <div class="hero-text">
                     <h1>喬政翔<span class="title-suffix">律師</span></h1>
@@ -121,15 +122,26 @@
                     <div class="stat-label">執業年數</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" data-field="articles">--</div>
-                    <div class="stat-label">發表文章</div>
+                    <div class="stat-number" data-field="caseTypes">--</div>
+                    <div class="stat-label">案件類型</div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Cases Section -->
+    <section class="section section-alt" id="cases">
+        <div class="container">
+            <h2 class="section-title">承辦案件類型</h2>
+            <p class="cases-subtitle" id="casesSubtitle">以下為公開判決書中曾承辦之案件類型統計</p>
+            <div class="cases-grid" id="casesGrid">
+                <p class="loading-text">載入中...</p>
+            </div>
+        </div>
+    </section>
+
     <!-- News Section -->
-    <section class="section section-alt" id="news">
+    <section class="section" id="news">
         <div class="container">
             <h2 class="section-title">媒體報導</h2>
             <div class="news-list" id="newsList">

@@ -153,8 +153,7 @@ img {
     object-fit: cover;
     box-shadow: var(--shadow-lg);
 }
-.avatar-img[src] + .avatar-placeholder,
-.avatar-img:not([onerror]) ~ .avatar-placeholder {
+.avatar-img + .avatar-placeholder {
     display: none;
 }
 .hero-text h1 {
@@ -331,6 +330,49 @@ img {
     color: var(--text-light);
     padding: 40px 0;
     font-style: italic;
+}
+
+/* ===== Cases ===== */
+.cases-subtitle {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: -32px;
+    margin-bottom: 32px;
+}
+.cases-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+.case-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    font-size: 0.9rem;
+    color: var(--text);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+.case-tag:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+.case-tag .case-count {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    min-width: 24px;
+    text-align: center;
 }
 
 /* ===== Contact ===== */

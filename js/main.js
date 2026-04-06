@@ -51,12 +51,14 @@ async function loadSiteData() {
         if (!response.ok) throw new Error('Data not found');
         const data = await response.json();
         renderStats(data.stats);
+        renderCases(data.cases);
         renderNews(data.news);
         renderArticles(data.articles);
         renderLastUpdated(data.lastUpdated);
     } catch (err) {
         console.log('Using static fallback:', err.message);
         renderStats(null);
+        renderCases([]);
         renderNews([]);
         renderArticles([]);
     }
@@ -70,7 +72,7 @@ function renderStats(stats) {
         totalCases: stats.totalCases || 0,
         legalAidCases: stats.legalAidCases || 0,
         yearsOfPractice: stats.yearsOfPractice || 0,
-        articles: stats.articles || 0
+        caseTypes: stats.caseTypes || 0
     };
 
     Object.entries(fields).forEach(([key, target]) => {
@@ -107,6 +109,34 @@ function animateNumber(el, target) {
     observer.observe(el);
 }
 
+// --- Render cases ---
+function renderCases(cases) {
+    const container = document.getElementById('casesGrid');
+    if (!container) return;
+
+    if (!cases || cases.length === 0) {
+        container.innerHTML = '<p class="empty-text">資料更新中...</p>';
+        return;
+    }
+
+    // Sort by count descending
+    const sorted = [...cases].sort((a, b) => (b.count || 0) - (a.count || 0));
+
+    container.innerHTML = sorted.map(item => `
+        <div class="case-tag">
+            <span>${escapeHtml(item.type)}</span>
+            ${item.count ? `<span class="case-count">${item.count}</span>` : ''}
+        </div>
+    `).join('');
+
+    // Update subtitle with total
+    const total = sorted.reduce((sum, c) => sum + (c.count || 0), 0);
+    const subtitle = document.getElementById('casesSubtitle');
+    if (subtitle && total > 0) {
+        subtitle.textContent = `以下為公開判決書中曾承辦之案件類型統計，共 ${total.toLocaleString()} 筆`;
+    }
+}
+
 // --- Render news ---
 function renderNews(news) {
     const container = document.getElementById('newsList');
@@ -131,7 +161,11 @@ function renderArticles(articles) {
     if (!container) return;
 
     if (!articles || articles.length === 0) {
-        container.innerHTML = '<p class="empty-text">暫無發表文章</p>';
+        // 隱藏整個發表文章區段
+        const section = document.getElementById('articles');
+        if (section) section.style.display = 'none';
+        // 隱藏導覽列中的連結
+        document.querySelectorAll('.nav-menu a[href="#articles"]').forEach(a => a.parentElement.style.display = 'none');
         return;
     }
 
