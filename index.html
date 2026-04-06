@@ -66,10 +66,7 @@
             <h2 class="section-title">關於我</h2>
             <div class="about-content">
                 <p>
-                    喬政翔律師，偵理法律事務所主持律師，執業於花蓮。長期投入司法改革運動，
-                    並積極參與法律扶助工作，為弱勢族群提供法律服務。專長涵蓋刑事辯護、
-                    民事訴訟、行政爭訟及消費者債務清理等領域，以嚴謹的法律分析與溫暖的
-                    人文關懷，為每一位當事人爭取最大的權益保障。
+                    喬政翔律師，偵理法律事務所主持律師，執業於花蓮與台北。長期投入司法改革運動，並積極參與法律扶助工作，為弱勢族群提供法律服務。專長涵蓋刑事辯護、民事訴訟、行政爭訟及消費者債務清理等領域，以嚴謹的法律分析與溫暖的人文關懷，為每一位當事人爭取最大的權益保障。
                 </p>
             </div>
         </div>
@@ -122,8 +119,8 @@
                     <div class="stat-label">執業年數</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" data-field="caseTypes">--</div>
-                    <div class="stat-label">案件類型</div>
+                    <div class="stat-number" data-field="judgments">--</div>
+                    <div class="stat-label">公開判決</div>
                 </div>
             </div>
         </div>
@@ -132,10 +129,41 @@
     <!-- Cases Section -->
     <section class="section section-alt" id="cases">
         <div class="container">
-            <h2 class="section-title">承辦案件類型</h2>
-            <p class="cases-subtitle" id="casesSubtitle">以下為公開判決書中曾承辦之案件類型統計</p>
-            <div class="cases-grid" id="casesGrid">
-                <p class="loading-text">載入中...</p>
+            <h2 class="section-title">承辦案件實績</h2>
+            <p class="cases-subtitle" id="casesSubtitle">司法院裁判書系統公開判決統計</p>
+
+            <!-- 四大類別統計 -->
+            <div class="case-categories" id="caseCategories">
+                <div class="case-cat" data-cat="civil">
+                    <div class="case-cat-number" id="catCivil">--</div>
+                    <div class="case-cat-label">民事案件</div>
+                </div>
+                <div class="case-cat" data-cat="criminal">
+                    <div class="case-cat-number" id="catCriminal">--</div>
+                    <div class="case-cat-label">刑事案件</div>
+                </div>
+                <div class="case-cat" data-cat="admin">
+                    <div class="case-cat-number" id="catAdmin">--</div>
+                    <div class="case-cat-label">行政案件</div>
+                </div>
+                <div class="case-cat" data-cat="const">
+                    <div class="case-cat-number" id="catConst">--</div>
+                    <div class="case-cat-label">憲法案件</div>
+                </div>
+            </div>
+
+            <!-- 案由類型標籤 -->
+            <div class="case-types-section">
+                <h3 class="case-types-title">案由類型</h3>
+                <div class="cases-grid" id="casesGrid">
+                    <p class="loading-text">載入中...</p>
+                </div>
+            </div>
+
+            <!-- 承辦法院分布 -->
+            <div class="courts-section" id="courtsSection">
+                <h3 class="case-types-title">承辦法院分布</h3>
+                <div class="courts-grid" id="courtsGrid"></div>
             </div>
         </div>
     </section>

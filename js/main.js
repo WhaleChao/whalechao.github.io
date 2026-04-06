@@ -51,14 +51,18 @@ async function loadSiteData() {
         if (!response.ok) throw new Error('Data not found');
         const data = await response.json();
         renderStats(data.stats);
+        renderCaseCategories(data.caseCategories);
         renderCases(data.cases);
+        renderCourts(data.courts);
         renderNews(data.news);
         renderArticles(data.articles);
         renderLastUpdated(data.lastUpdated);
     } catch (err) {
         console.log('Using static fallback:', err.message);
         renderStats(null);
+        renderCaseCategories(null);
         renderCases([]);
+        renderCourts(null);
         renderNews([]);
         renderArticles([]);
     }
@@ -72,7 +76,7 @@ function renderStats(stats) {
         totalCases: stats.totalCases || 0,
         legalAidCases: stats.legalAidCases || 0,
         yearsOfPractice: stats.yearsOfPractice || 0,
-        caseTypes: stats.caseTypes || 0
+        judgments: stats.totalCases || 0
     };
 
     Object.entries(fields).forEach(([key, target]) => {
@@ -109,7 +113,31 @@ function animateNumber(el, target) {
     observer.observe(el);
 }
 
-// --- Render cases ---
+// --- Render case categories (4 big numbers) ---
+function renderCaseCategories(cats) {
+    if (!cats) return;
+    const mapping = {
+        '民事': 'catCivil',
+        '刑事': 'catCriminal',
+        '行政': 'catAdmin',
+        '憲法': 'catConst'
+    };
+    Object.entries(mapping).forEach(([key, elId]) => {
+        const el = document.getElementById(elId);
+        if (el && cats[key] !== undefined) {
+            animateNumber(el, cats[key]);
+        }
+    });
+
+    // Update subtitle with total
+    const total = Object.values(cats).reduce((s, v) => s + v, 0);
+    const subtitle = document.getElementById('casesSubtitle');
+    if (subtitle && total > 0) {
+        subtitle.textContent = `司法院裁判書系統公開判決統計，共 ${total.toLocaleString()} 筆`;
+    }
+}
+
+// --- Render case type tags ---
 function renderCases(cases) {
     const container = document.getElementById('casesGrid');
     if (!container) return;
@@ -119,22 +147,45 @@ function renderCases(cases) {
         return;
     }
 
-    // Sort by count descending
-    const sorted = [...cases].sort((a, b) => (b.count || 0) - (a.count || 0));
+    // Filter out non-case-reasons & sort by count
+    const filtered = cases.filter(c => !['訴訟救助', '聲請復權'].includes(c.type));
+    const sorted = [...filtered].sort((a, b) => (b.count || 0) - (a.count || 0));
+
+    const catClass = (cat) => {
+        if (!cat) return '';
+        if (cat === '民事') return 'cat-civil';
+        if (cat === '刑事') return 'cat-criminal';
+        if (cat === '行政') return 'cat-admin';
+        if (cat === '憲法') return 'cat-const';
+        return '';
+    };
 
     container.innerHTML = sorted.map(item => `
-        <div class="case-tag">
+        <div class="case-tag ${catClass(item.category)}">
             <span>${escapeHtml(item.type)}</span>
             ${item.count ? `<span class="case-count">${item.count}</span>` : ''}
         </div>
     `).join('');
+}
 
-    // Update subtitle with total
-    const total = sorted.reduce((sum, c) => sum + (c.count || 0), 0);
-    const subtitle = document.getElementById('casesSubtitle');
-    if (subtitle && total > 0) {
-        subtitle.textContent = `以下為公開判決書中曾承辦之案件類型統計，共 ${total.toLocaleString()} 筆`;
-    }
+// --- Render courts distribution ---
+function renderCourts(courts) {
+    const container = document.getElementById('courtsGrid');
+    if (!container || !courts) return;
+
+    const sorted = Object.entries(courts).sort((a, b) => b[1] - a[1]);
+    container.innerHTML = sorted.map(([name, count]) => {
+        // Shorten court names for display
+        const short = name
+            .replace('臺灣', '')
+            .replace('地方法院', '地院')
+            .replace('高等法院', '高院')
+            .replace('高等行政法院', '高行')
+            .replace(' 高等庭(含改制前臺北高等行政法院)', '')
+            .replace(' 高等庭(含改制前高雄高等行政法院)', '')
+            .replace(' 地方庭', '');
+        return `<div class="court-item"><span>${escapeHtml(short)}</span><span class="court-count">${count}</span></div>`;
+    }).join('');
 }
 
 // --- Render news ---

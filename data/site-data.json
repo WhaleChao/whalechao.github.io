@@ -1,121 +1,71 @@
 {
-    "lastUpdated": "2026-04-06T10:14:14.308452+08:00",
+    "lastUpdated": "2026-04-06T10:40:00+08:00",
     "stats": {
-        "totalCases": 54,
+        "totalCases": 473,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
-        "articles": 0,
-        "caseTypes": 25
+        "caseTypes": 4,
+        "articles": 0
+    },
+    "caseCategories": {
+        "民事": 248,
+        "刑事": 201,
+        "行政": 23,
+        "憲法": 1
+    },
+    "cases": [
+        {"type": "更生事件", "count": 3, "category": "民事"},
+        {"type": "清算事件", "count": 2, "category": "民事"},
+        {"type": "傷害致死等", "count": 2, "category": "刑事"},
+        {"type": "違反毒品危害防制條例", "count": 2, "category": "刑事"},
+        {"type": "公民投票法", "count": 2, "category": "行政"},
+        {"type": "毒品危害防制條例", "count": 1, "category": "刑事"},
+        {"type": "假釋", "count": 1, "category": "行政"},
+        {"type": "返還土地等", "count": 1, "category": "民事"},
+        {"type": "聲請裁定不行國民法官審判", "count": 1, "category": "刑事"},
+        {"type": "分割共有物", "count": 1, "category": "民事"},
+        {"type": "聲請復權", "count": 1, "category": "民事"},
+        {"type": "妨害性自主", "count": 1, "category": "刑事"},
+        {"type": "洗錢防制法等", "count": 1, "category": "刑事"},
+        {"type": "聲請更生程序", "count": 1, "category": "民事"},
+        {"type": "聲請假釋", "count": 1, "category": "刑事"},
+        {"type": "違反毒品危害防制條例", "count": 1, "category": "刑事"},
+        {"type": "聲請更生程序", "count": 1, "category": "民事"},
+        {"type": "返還不當得利等", "count": 1, "category": "民事"},
+        {"type": "給付資遣費等", "count": 1, "category": "民事"},
+        {"type": "確認僱傭關係", "count": 1, "category": "民事"},
+        {"type": "損害賠償", "count": 1, "category": "民事"},
+        {"type": "聲請停止執行", "count": 1, "category": "行政"}
+    ],
+    "courts": {
+        "臺灣臺北地方法院": 102,
+        "臺灣新北地方法院": 84,
+        "臺灣高等法院": 65,
+        "臺灣士林地方法院": 62,
+        "最高法院": 30,
+        "臺灣基隆地方法院": 30,
+        "臺灣宜蘭地方法院": 23,
+        "臺灣花蓮地方法院": 20,
+        "臺北高等行政法院": 13,
+        "臺灣桃園地方法院": 9,
+        "臺灣高等法院 臺南分院": 8,
+        "臺灣新竹地方法院": 7,
+        "臺灣嘉義地方法院": 5,
+        "高雄高等行政法院": 5,
+        "臺灣臺東地方法院": 3,
+        "臺灣高等法院 花蓮分院": 2,
+        "智慧財產及商業法院": 2,
+        "憲法法庭": 1,
+        "臺灣高等法院 臺中分院": 1,
+        "臺灣高等法院 高雄分院": 1
     },
     "news": [
         {
             "title": "與司改會一起長大：專訪喬政翔律師",
             "url": "https://www.jrf.org.tw/articles/1969",
-            "date": "2023",
-            "source": "司法改革基金會"
+            "source": "司法改革基金會",
+            "date": "2023"
         }
     ],
-    "articles": [],
-    "cases": [
-        {
-            "type": "詐欺",
-            "count": 5
-        },
-        {
-            "type": "更生事件",
-            "count": 5
-        },
-        {
-            "type": "竊盜",
-            "count": 4
-        },
-        {
-            "type": "傷害",
-            "count": 3
-        },
-        {
-            "type": "公共危險",
-            "count": 3
-        },
-        {
-            "type": "毒品危害防制條例",
-            "count": 3
-        },
-        {
-            "type": "損害賠償",
-            "count": 3
-        },
-        {
-            "type": "清算事件",
-            "count": 3
-        },
-        {
-            "type": "給付工資",
-            "count": 2
-        },
-        {
-            "type": "給付資遣費",
-            "count": 2
-        },
-        {
-            "type": "返還不當得利",
-            "count": 2
-        },
-        {
-            "type": "前置協商",
-            "count": 2
-        },
-        {
-            "type": "國家賠償",
-            "count": 2
-        },
-        {
-            "type": "遺產分割",
-            "count": 2
-        },
-        {
-            "type": "離婚",
-            "count": 2
-        },
-        {
-            "type": "酒後駕車",
-            "count": 2
-        },
-        {
-            "type": "確認僱傭關係存在",
-            "count": 1
-        },
-        {
-            "type": "撤銷訴願決定",
-            "count": 1
-        },
-        {
-            "type": "交通裁決",
-            "count": 1
-        },
-        {
-            "type": "改定監護權",
-            "count": 1
-        },
-        {
-            "type": "妨害自由",
-            "count": 1
-        },
-        {
-            "type": "恐嚇",
-            "count": 1
-        },
-        {
-            "type": "侵占",
-            "count": 1
-        },
-        {
-            "type": "過失傷害",
-            "count": 1
-        },
-        {
-            "type": "違反保護令",
-            "count": 1
-        }
-    ]
+    "articles": []
 }

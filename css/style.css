@@ -338,12 +338,56 @@ img {
     color: var(--text-light);
     font-size: 0.9rem;
     margin-top: -32px;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
+}
+.case-categories {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 700px;
+    margin: 0 auto 48px;
+}
+.case-cat {
+    text-align: center;
+    padding: 24px 12px;
+    background: var(--bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+.case-cat:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+.case-cat-number {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+.case-cat[data-cat="civil"] .case-cat-number { color: #2563eb; }
+.case-cat[data-cat="criminal"] .case-cat-number { color: #dc2626; }
+.case-cat[data-cat="admin"] .case-cat-number { color: #059669; }
+.case-cat[data-cat="const"] .case-cat-number { color: #7c3aed; }
+.case-cat-label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+.case-types-section {
+    margin-bottom: 40px;
+}
+.case-types-title {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--text-light);
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: 0.05em;
 }
 .cases-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     justify-content: center;
     max-width: 800px;
     margin: 0 auto;
@@ -352,11 +396,11 @@ img {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 18px;
+    padding: 7px 16px;
     background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 24px;
-    font-size: 0.9rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
     color: var(--text);
     transition: transform var(--transition), box-shadow var(--transition);
 }
@@ -365,14 +409,46 @@ img {
     box-shadow: var(--shadow-md);
 }
 .case-tag .case-count {
-    background: var(--primary-light);
-    color: var(--primary-dark);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 12px;
-    min-width: 24px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    min-width: 20px;
     text-align: center;
+}
+.case-tag.cat-civil .case-count { background: #dbeafe; color: #1d4ed8; }
+.case-tag.cat-criminal .case-count { background: #fee2e2; color: #b91c1c; }
+.case-tag.cat-admin .case-count { background: #d1fae5; color: #065f46; }
+.case-tag.cat-const .case-count { background: #ede9fe; color: #5b21b6; }
+.courts-section {
+    max-width: 700px;
+    margin: 0 auto;
+}
+.courts-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+.court-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    color: var(--text-light);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+.court-item .court-count {
+    font-weight: 700;
+    color: var(--text);
+}
+@media (max-width: 480px) {
+    .case-categories {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* ===== Contact ===== */
