@@ -3,6 +3,9 @@
 判決書爬蟲 — 從司法院裁判書查詢系統搜尋喬政翔律師的公開判決
 抓取案由分類統計，更新 site-data.json
 
+SSL 修正：Python 3.14 + OpenSSL 3.x 對 judicial.gov.tw 的 SKI 檢查過嚴，
+         使用 relaxed SSL context 解決。
+
 使用方式：
     python3 crawl_judgments.py              # 搜尋並更新
     python3 crawl_judgments.py --push       # 搜尋、更新、並推送到 GitHub
@@ -12,289 +15,232 @@ import argparse
 import json
 import os
 import re
+import ssl
 import subprocess
 import sys
 import time
 from collections import Counter
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from urllib.parse import quote
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.ssl_ import create_urllib3_context
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 TW_TZ = timezone(timedelta(hours=8))
 REPO_ROOT = Path(__file__).parent.parent
 DATA_FILE = REPO_ROOT / "data" / "site-data.json"
-
 LAWYER_NAME = "喬政翔"
 
-# 司法院裁判書查詢 API
-FJUD_SEARCH_URL = "https://judgment.judicial.gov.tw/FJUD/data.aspx"
-FJUD_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-    "Accept": "application/json, text/javascript, */*; q=0.01",
-    "X-Requested-With": "XMLHttpRequest",
-    "Referer": "https://judgment.judicial.gov.tw/FJUD/default.aspx",
-}
+FJUD_BASE = "https://judgment.judicial.gov.tw/FJUD"
 
 
-def search_judgments_fjud():
+class RelaxedSSLAdapter(HTTPAdapter):
+    """HTTPAdapter that relaxes X.509 strict mode for judicial.gov.tw"""
+    def init_poolmanager(self, *args, **kwargs):
+        try:
+            import certifi
+            ca_bundle = certifi.where()
+        except ImportError:
+            ca_bundle = None
+        ctx = create_urllib3_context()
+        if ca_bundle:
+            ctx.load_verify_locations(ca_bundle)
+        ctx.verify_flags &= ~ssl.VERIFY_X509_STRICT
+        kwargs["ssl_context"] = ctx
+        super().init_poolmanager(*args, **kwargs)
+
+
+def create_session():
+    """建立帶 SSL 修正的 session"""
+    session = requests.Session()
+    adapter = RelaxedSSLAdapter()
+    session.mount("https://judgment.judicial.gov.tw", adapter)
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
+    })
+    return session
+
+
+def search_fjud(session):
     """
-    透過司法院 FJUD 查詢含有律師名字的判決書
+    搜尋司法院裁判書查詢系統
+    1. GET 搜尋頁面取得 ViewState
+    2. POST 搜尋
+    3. 解析結果頁面中的分類統計
     """
-    all_cases = []
+    print(f"正在搜尋司法院裁判書（{LAWYER_NAME}）...")
 
-    # 搜尋全文包含律師名字的判決
-    params = {
-        "searchtype": "全文檢索",
-        "keyword": LAWYER_NAME,
-        "sdate": "",
-        "edate": "",
-        "page": 1,
-        "pagesize": 100,
+    # Step 1: 取得搜尋頁面
+    r0 = session.get(f"{FJUD_BASE}/default.aspx", timeout=15)
+    if r0.status_code != 200:
+        print(f"  搜尋頁面載入失敗: {r0.status_code}")
+        return None
+
+    # 提取 ASP.NET form fields
+    vs = re.search(r'id="__VIEWSTATE"\s+value="([^"]*)"', r0.text)
+    vsg = re.search(r'id="__VIEWSTATEGENERATOR"\s+value="([^"]*)"', r0.text)
+    ev = re.search(r'id="__EVENTVALIDATION"\s+value="([^"]*)"', r0.text)
+
+    # Step 2: POST 搜尋
+    post_data = {
+        "__VIEWSTATE": vs.group(1) if vs else "",
+        "__VIEWSTATEGENERATOR": vsg.group(1) if vsg else "",
+        "__EVENTVALIDATION": ev.group(1) if ev else "",
+        "txtKW": LAWYER_NAME,
+        "judtype": "JUDBOOK",
+        "whosType": "0",
+        "btnSimpleQry": "送出查詢",
     }
 
-    try:
-        print(f"正在搜尋司法院判決書（關鍵字：{LAWYER_NAME}）...")
-        resp = requests.get(
-            FJUD_SEARCH_URL,
-            params=params,
-            headers=FJUD_HEADERS,
-            timeout=30,
-        )
-        if resp.status_code == 200:
-            data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
-            if "gridView" in data:
-                for item in data["gridView"]:
-                    case_type = item.get("JCASE", "")  # 案由
-                    if case_type:
-                        all_cases.append(case_type)
-            print(f"  FJUD 找到 {len(all_cases)} 筆")
-    except Exception as e:
-        print(f"  FJUD 查詢失敗: {e}")
+    r1 = session.post(
+        f"{FJUD_BASE}/default.aspx",
+        data=post_data,
+        timeout=30,
+        allow_redirects=True,
+    )
+    print(f"  搜尋結果: {r1.status_code}")
 
-    return all_cases
+    # Step 3: 取得結果頁
+    r2 = session.get(f"{FJUD_BASE}/qryresult.aspx", timeout=15)
 
+    # 解析分類統計（從側邊欄 panel）
+    result = {
+        "total": 0,
+        "categories": {},
+        "courts": {},
+        "cases": [],
+    }
 
-def search_judgments_lawsnote():
-    """
-    透過 Lawsnote 公開頁面搜尋律師的判決資料
-    """
-    all_cases = []
-    try:
-        print(f"正在搜尋 Lawsnote（律師：{LAWYER_NAME}）...")
-        # Lawsnote 律師頁面
-        url = "https://page.lawsnote.com/page/5cffa99e0890331626f56525"
-        resp = requests.get(url, headers={
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
-        }, timeout=15)
+    # 總筆數
+    total_match = re.search(r"共\s*(\d+)\s*筆", r2.text)
+    if total_match:
+        result["total"] = int(total_match.group(1))
+        print(f"  找到 {result['total']} 筆判決")
 
-        if resp.status_code == 200:
-            text = resp.text
-            # 嘗試從頁面中提取案件類型
-            # Lawsnote 頁面通常有案件分類統計
-            # 嘗試解析 JSON 資料
-            json_match = re.search(r'window\.__INITIAL_STATE__\s*=\s*({.+?});', text, re.DOTALL)
-            if json_match:
-                try:
-                    state = json.loads(json_match.group(1))
-                    # 從 state 中提取案件資訊
-                    if "cases" in state:
-                        for case in state["cases"]:
-                            case_type = case.get("type", "") or case.get("reason", "")
-                            if case_type:
-                                all_cases.append(case_type)
-                except json.JSONDecodeError:
-                    pass
+    # 案件類別（民事/刑事/行政/憲法）
+    cat_pattern = r'<a[^>]*>(.*?)<span[^>]*class="badge"[^>]*>(\d+)</span>'
+    for match in re.finditer(cat_pattern, r2.text, re.DOTALL):
+        name = re.sub(r"<[^>]+>", "", match.group(1)).strip().lstrip("»").strip()
+        count = int(match.group(2))
+        if name in ("民事", "刑事", "行政", "憲法"):
+            result["categories"][name] = count
+        elif not any(c in name for c in ["民國", "年"]):
+            # 法院名稱
+            result["courts"][name] = count
 
-            print(f"  Lawsnote 找到 {len(all_cases)} 筆")
-    except Exception as e:
-        print(f"  Lawsnote 查詢失敗: {e}")
+    print(f"  類別: {result['categories']}")
+    print(f"  法院: {len(result['courts'])} 個")
 
-    return all_cases
+    # 從結果頁面取得案由（如果有 iframe）
+    # 嘗試直接取得 iframe 的內容
+    iframe_match = re.search(r'<iframe[^>]*id="iframe-data"[^>]*src="([^"]*)"', r2.text)
+    if iframe_match:
+        iframe_src = iframe_match.group(1)
+        if not iframe_src.startswith("http"):
+            iframe_src = f"{FJUD_BASE}/{iframe_src}"
 
+        # 抓取多頁案由
+        all_reasons = []
+        pages_to_fetch = min(24, (result["total"] // 20) + 1)
 
-def search_judgments_local_db():
-    """
-    從 MAGI 本地資料庫搜尋判決資料
-    """
-    all_cases = []
-    try:
-        import mysql.connector
-
-        # 載入 MAGI 環境變數
-        magi_env = {}
-        env_path = Path(os.path.expanduser("~/Desktop/MAGI_v2/.env"))
-        if env_path.exists():
-            with open(env_path) as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#") and "=" in line:
-                        key, _, value = line.partition("=")
-                        magi_env[key.strip()] = value.strip().strip("'\"")
-
-        conn = mysql.connector.connect(
-            host=magi_env.get("MAGI_DB_HOST", "127.0.0.1"),
-            port=int(magi_env.get("MAGI_DB_PORT", "3306")),
-            user=magi_env.get("MAGI_DB_USER", "magi"),
-            password=magi_env.get("MAGI_DB_PASSWORD", ""),
-            database=magi_env.get("MAGI_DB_NAME", "law_firm_data"),
-        )
-        cursor = conn.cursor(dictionary=True)
-
-        # 查詢 court_judgments 表中包含律師名字的案件
-        tables_to_check = ["court_judgments", "judgments", "cases"]
-        for table in tables_to_check:
+        for page in range(1, pages_to_fetch + 1):
             try:
-                # 先確認表存在
-                cursor.execute(f"SHOW TABLES LIKE '{table}'")
-                if not cursor.fetchone():
-                    continue
+                page_url = re.sub(r'page=\d+', f'page={page}', iframe_src)
+                if 'page=' not in page_url:
+                    sep = '&' if '?' in page_url else '?'
+                    page_url += f'{sep}page={page}'
 
-                # 取得欄位名稱
-                cursor.execute(f"SHOW COLUMNS FROM {table}")
-                columns = [col["Field"] for col in cursor.fetchall()]
+                rp = session.get(page_url, timeout=15)
+                if rp.status_code == 200:
+                    # 提取案由（最後一個 td）
+                    rows = re.findall(r'<tr[^>]*>(.*?)</tr>', rp.text, re.DOTALL)
+                    for row in rows:
+                        tds = re.findall(r'<td[^>]*>(.*?)</td>', row, re.DOTALL)
+                        if len(tds) >= 3:
+                            reason = re.sub(r'<[^>]+>', '', tds[-1]).strip()
+                            if reason and reason != "裁判案由" and len(reason) < 40:
+                                all_reasons.append(reason)
 
-                # 找案由欄位
-                reason_col = None
-                for possible in ["case_reason", "reason", "JCASE", "case_type", "案由"]:
-                    if possible in columns:
-                        reason_col = possible
-                        break
-
-                # 找全文/內容欄位
-                content_col = None
-                for possible in ["content", "full_text", "JFULL", "judgment_text", "內容"]:
-                    if possible in columns:
-                        content_col = possible
-                        break
-
-                if reason_col and content_col:
-                    query = f"SELECT `{reason_col}` FROM `{table}` WHERE `{content_col}` LIKE %s"
-                    cursor.execute(query, (f"%{LAWYER_NAME}%",))
-                    for row in cursor.fetchall():
-                        if row[reason_col]:
-                            all_cases.append(row[reason_col])
-                elif reason_col:
-                    # 沒有全文欄位，嘗試其他方式
-                    for search_col in columns:
-                        if any(k in search_col.lower() for k in ["lawyer", "attorney", "代理", "辯護"]):
-                            query = f"SELECT `{reason_col}` FROM `{table}` WHERE `{search_col}` LIKE %s"
-                            cursor.execute(query, (f"%{LAWYER_NAME}%",))
-                            for row in cursor.fetchall():
-                                if row[reason_col]:
-                                    all_cases.append(row[reason_col])
-                            break
-
-                print(f"  本地 DB ({table}) 找到 {len(all_cases)} 筆")
+                    sys.stdout.write(f"\r  抓取案由: 第 {page}/{pages_to_fetch} 頁 ({len(all_reasons)} 筆)")
+                    sys.stdout.flush()
+                    time.sleep(0.5)  # 避免請求過快
             except Exception as e:
+                print(f"\n  第 {page} 頁失敗: {e}")
                 continue
 
-        cursor.close()
-        conn.close()
-    except ImportError:
-        print("  mysql.connector 未安裝，跳過本地 DB")
-    except Exception as e:
-        print(f"  本地 DB 查詢失敗: {e}")
+        print()  # 換行
 
-    return all_cases
+        if all_reasons:
+            # 過濾非案由項目
+            skip_reasons = {"訴訟救助", "聲請復權", ""}
+            filtered = [r for r in all_reasons if r not in skip_reasons]
 
+            counter = Counter(filtered)
 
-def search_via_google():
-    """
-    用 Google 搜尋公開判決資料作為備用方案
-    """
-    cases = []
-    try:
-        print("正在用備用方式搜尋公開判決...")
-        # 搜尋花蓮地院/高等法院有喬政翔的判決
-        search_url = "https://judgment.judicial.gov.tw/FJUD/default.aspx"
-        session = requests.Session()
-        session.headers.update(FJUD_HEADERS)
+            # 為每個案由判斷分類
+            criminal_keywords = ["罪", "毒品", "竊盜", "詐欺", "傷害", "殺人", "妨害", "恐嚇",
+                               "侵占", "偽造", "洗錢", "公共危險", "過失", "國民法官", "假釋",
+                               "強盜", "搶奪", "性自主", "酒駕"]
+            admin_keywords = ["行政", "訴願", "裁決", "國家賠償", "公民投票"]
 
-        # 先取得頁面以獲取 session
-        resp = session.get(search_url, timeout=15)
+            def classify(reason):
+                for kw in criminal_keywords:
+                    if kw in reason:
+                        return "刑事"
+                for kw in admin_keywords:
+                    if kw in reason:
+                        return "行政"
+                return "民事"
 
-        if resp.status_code == 200:
-            # 嘗試透過 POST 搜尋
-            search_data = {
-                "txtKW": LAWYER_NAME,
-                "judtype": "JUDBOOK",
-                "whos498": "0",
-                "sel_jword": "",
-                "jno": "",
-                "jyr_s": "",
-                "jyr_e": "",
-                "sdate": "",
-                "edate": "",
-            }
-            resp2 = session.post(
-                "https://judgment.judicial.gov.tw/FJUD/qryresult.aspx",
-                data=search_data,
-                timeout=30,
-            )
-            if resp2.status_code == 200:
-                # 從 HTML 中提取案由
-                pattern = r'<td[^>]*>([^<]*(?:罪|事件|爭議|糾紛|損害|清償|給付|返還|確認|撤銷|聲請|聲明|訴訟|更生|清算|異議|抗告)[^<]*)</td>'
-                matches = re.findall(pattern, resp2.text)
-                for m in matches:
-                    cleaned = m.strip()
-                    if cleaned and len(cleaned) < 30:
-                        cases.append(cleaned)
-                print(f"  備用搜尋找到 {len(cases)} 筆")
-    except Exception as e:
-        print(f"  備用搜尋失敗: {e}")
+            result["cases"] = [
+                {"type": t, "count": c, "category": classify(t)}
+                for t, c in counter.most_common()
+            ]
 
-    return cases
-
-
-def aggregate_cases(all_cases):
-    """
-    統計案由分類
-    """
-    # 清理和標準化案由名稱
-    cleaned = []
-    for case in all_cases:
-        # 移除空白和特殊字元
-        case = case.strip()
-        if not case or len(case) > 50:
-            continue
-        # 標準化常見案由
-        case = re.sub(r'等$', '', case)
-        case = case.strip()
-        if case:
-            cleaned.append(case)
-
-    counter = Counter(cleaned)
-    result = [{"type": case_type, "count": count} for case_type, count in counter.most_common()]
     return result
 
 
-def update_site_data(cases_data):
+def update_site_data(fjud_result):
     """更新 site-data.json"""
     data = {}
     if DATA_FILE.exists():
         with open(DATA_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-    data["cases"] = cases_data
-    data["lastUpdated"] = datetime.now(TW_TZ).isoformat()
+    if fjud_result:
+        data["lastUpdated"] = datetime.now(TW_TZ).isoformat()
 
-    # 更新統計中的案件總數
-    total = sum(c["count"] for c in cases_data)
-    if total > 0 and "stats" in data:
-        data["stats"]["totalCases"] = total
+        # 更新統計
+        data["stats"] = data.get("stats", {})
+        data["stats"]["totalCases"] = fjud_result["total"]
+
+        # 更新分類
+        data["caseCategories"] = fjud_result["categories"]
+
+        # 更新案由
+        data["cases"] = fjud_result["cases"]
+
+        # 更新法院
+        data["courts"] = fjud_result["courts"]
 
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
     print(f"\n已更新 {DATA_FILE}")
-    print(f"案件類型數: {len(cases_data)}")
-    print(f"案件總數: {total}")
-    if cases_data:
-        print("\n前 10 大案件類型:")
-        for c in cases_data[:10]:
-            print(f"  {c['type']}: {c['count']} 件")
+    if fjud_result:
+        print(f"總判決數: {fjud_result['total']}")
+        print(f"類別: {fjud_result['categories']}")
+        print(f"案由類型: {len(fjud_result['cases'])} 種")
+        if fjud_result["cases"]:
+            print("\n前 15 大案由:")
+            for c in fjud_result["cases"][:15]:
+                print(f"  [{c['category']}] {c['type']}: {c['count']}")
 
 
 def git_push():
@@ -325,63 +271,16 @@ def main():
     args = parser.parse_args()
 
     print("=" * 50)
-    print(f"  判決書爬蟲 — 搜尋 {LAWYER_NAME} 律師的公開判決")
+    print(f"  判決書爬蟲 — {LAWYER_NAME} 律師公開判決統計")
     print("=" * 50)
 
-    all_cases = []
+    session = create_session()
+    result = search_fjud(session)
 
-    # 1. 嘗試本地 DB
-    db_cases = search_judgments_local_db()
-    all_cases.extend(db_cases)
-
-    # 2. 嘗試 FJUD
-    fjud_cases = search_judgments_fjud()
-    all_cases.extend(fjud_cases)
-
-    # 3. 嘗試 Lawsnote
-    lawsnote_cases = search_judgments_lawsnote()
-    all_cases.extend(lawsnote_cases)
-
-    # 4. 如果以上都沒結果，嘗試備用方式
-    if not all_cases:
-        google_cases = search_via_google()
-        all_cases.extend(google_cases)
-
-    # 5. 如果還是沒結果，使用常見案由作為初始資料
-    if not all_cases:
-        print("\n無法從線上取得判決資料，使用初始案件類型資料...")
-        all_cases = [
-            # 根據律師專長領域的常見案由
-            "詐欺", "詐欺", "詐欺", "詐欺", "詐欺",
-            "竊盜", "竊盜", "竊盜", "竊盜",
-            "傷害", "傷害", "傷害",
-            "公共危險", "公共危險", "公共危險",
-            "毒品危害防制條例", "毒品危害防制條例", "毒品危害防制條例",
-            "給付工資", "給付工資",
-            "給付資遣費", "給付資遣費",
-            "損害賠償", "損害賠償", "損害賠償",
-            "返還不當得利", "返還不當得利",
-            "確認僱傭關係存在",
-            "更生事件", "更生事件", "更生事件", "更生事件", "更生事件",
-            "清算事件", "清算事件", "清算事件",
-            "前置協商", "前置協商",
-            "國家賠償", "國家賠償",
-            "撤銷訴願決定",
-            "交通裁決",
-            "遺產分割", "遺產分割",
-            "離婚", "離婚",
-            "改定監護權",
-            "酒後駕車", "酒後駕車",
-            "妨害自由",
-            "恐嚇",
-            "侵占",
-            "過失傷害",
-            "違反保護令",
-        ]
-
-    # 統計
-    cases_data = aggregate_cases(all_cases)
-    update_site_data(cases_data)
+    if result and result["total"] > 0:
+        update_site_data(result)
+    else:
+        print("未能取得判決資料")
 
     if args.push:
         git_push()
