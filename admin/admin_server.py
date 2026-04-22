@@ -379,14 +379,14 @@ async function doLogin(e) {
     const pw = document.getElementById('password').value;
     const errEl = document.getElementById('errorMsg');
     try {
-        const resp = await fetch('/api/login', {
+        const resp = await fetch('api/login', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({password: pw})
         });
         const data = await resp.json();
         if (data.success) {
-            window.location.href = '/';
+            window.location.href = window.location.pathname.replace(/\\/login$/, '/') || '/';
         } else {
             errEl.textContent = data.message || '密碼錯誤';
             errEl.style.display = 'block';
@@ -542,11 +542,11 @@ let contentData = {};
 async function loadAll() {
     try {
         const [dataResp, contentResp] = await Promise.all([
-            fetch('/api/data'),
-            fetch('/api/content')
+            fetch('api/data'),
+            fetch('api/content')
         ]);
 
-        if (dataResp.status === 401) { window.location.href = '/login'; return; }
+        if (dataResp.status === 401) { window.location.reload(); return; }
 
         siteData = await dataResp.json();
         contentData = await contentResp.json();
@@ -646,12 +646,12 @@ async function saveAll() {
 
     try {
         const [r1, r2] = await Promise.all([
-            fetch('/api/data', {
+            fetch('api/data', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(siteData)
             }),
-            fetch('/api/content', {
+            fetch('api/content', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -669,7 +669,7 @@ async function saveAll() {
 async function pushToGitHub() {
     showStatus('正在推送到 GitHub...', 'info');
     try {
-        const resp = await fetch('/api/push', {
+        const resp = await fetch('api/push', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({})
@@ -696,7 +696,7 @@ async function uploadPhoto() {
     formData.append('photo', file);
 
     try {
-        const resp = await fetch('/api/upload-photo', { method: 'POST', body: formData });
+        const resp = await fetch('api/upload-photo', { method: 'POST', body: formData });
         const result = await resp.json();
         if (result.success) {
             document.getElementById('photoPreview').innerHTML =
@@ -711,8 +711,8 @@ async function uploadPhoto() {
 }
 
 async function logout() {
-    await fetch('/api/logout', { method: 'POST' });
-    window.location.href = '/login';
+    await fetch('api/logout', { method: 'POST' });
+    window.location.reload();
 }
 
 function showStatus(msg, type, autoHide) {
