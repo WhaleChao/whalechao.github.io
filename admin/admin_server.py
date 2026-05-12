@@ -7,6 +7,7 @@
     WEBSITE_ADMIN_PASSWORD=你的密碼 python3 admin_server.py
     python3 admin_server.py --password 你的密碼  # 自訂密碼（不建議用於常駐程序，會出現在 ps）
     python3 admin_server.py --port 9090         # 自訂 port
+    未指定密碼時使用 admin/.admin_config.json；若尚未設定，預設為 6318。
 
 存取方式：
     本地: http://localhost:8088
@@ -31,10 +32,11 @@ REPO_ROOT = Path(__file__).parent.parent
 DATA_FILE = REPO_ROOT / "data" / "site-data.json"
 CONTENT_FILE = REPO_ROOT / "data" / "content.json"
 ASSETS_DIR = REPO_ROOT / "assets"
+ADMIN_CONFIG_FILE = Path(__file__).parent / ".admin_config.json"
 
 # 預設設定
 DEFAULT_PORT = 8088
-DEFAULT_PASSWORD = os.environ.get("WEBSITE_ADMIN_PASSWORD", "")
+FACTORY_DEFAULT_PASSWORD = "6318"
 
 # Session token store
 VALID_TOKENS = set()
@@ -51,6 +53,26 @@ def save_json(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+
+
+def load_admin_config():
+    try:
+        data = load_json(ADMIN_CONFIG_FILE)
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def save_admin_config(data):
+    save_json(ADMIN_CONFIG_FILE, data)
+
+
+def default_password():
+    env_password = os.environ.get("WEBSITE_ADMIN_PASSWORD", "")
+    if env_password:
+        return env_password
+    configured = str(load_admin_config().get("password") or "")
+    return configured or FACTORY_DEFAULT_PASSWORD
 
 
 def git_push(message):
@@ -114,7 +136,7 @@ def parse_multipart(content_type, body):
 
 
 class AdminHandler(BaseHTTPRequestHandler):
-    password = DEFAULT_PASSWORD
+    password = default_password()
 
     def check_auth(self):
         """檢查 session token 或顯示登入頁"""
@@ -201,6 +223,33 @@ class AdminHandler(BaseHTTPRequestHandler):
 
         elif parsed.path == "/api/upload-photo":
             self.handle_photo_upload(content_length)
+
+        elif parsed.path == "/api/password":
+            body = self.rfile.read(content_length)
+            data = json.loads(body.decode("utf-8")) if body else {}
+            current_password = str(data.get("current_password") or "")
+            new_password = str(data.get("new_password") or "")
+            if current_password != self.password:
+                self.send_json({"success": False, "message": "目前密碼不正確"})
+            elif len(new_password) < 4:
+                self.send_json({"success": False, "message": "新密碼至少需要 4 個字元"})
+            else:
+                config = load_admin_config()
+                config["password"] = new_password
+                config["updatedAt"] = datetime.now(TW_TZ).isoformat()
+                save_admin_config(config)
+                AdminHandler.password = new_password
+                VALID_TOKENS.clear()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Set-Cookie", "session=; Path=/; Max-Age=0")
+                resp = json.dumps({
+                    "success": True,
+                    "message": "密碼已更新，請用新密碼重新登入。"
+                }, ensure_ascii=False).encode("utf-8")
+                self.send_header("Content-Length", len(resp))
+                self.end_headers()
+                self.wfile.write(resp)
 
         elif parsed.path == "/api/push":
             body = self.rfile.read(content_length)
@@ -470,6 +519,25 @@ textarea{resize:vertical;min-height:100px}
 <div class="main">
     <div id="statusMsg" class="status"></div>
 
+    <!-- MAGI 密碼 -->
+    <div class="card">
+        <h2><span class="icon">&#128274;</span> MAGI 密碼</h2>
+        <div class="stats-grid">
+            <div class="form-group">
+                <label>目前密碼</label>
+                <input type="password" id="currentPassword" autocomplete="current-password">
+            </div>
+            <div class="form-group">
+                <label>新密碼</label>
+                <input type="password" id="newPassword" autocomplete="new-password">
+            </div>
+        </div>
+        <button class="btn btn-primary" onclick="changePassword()">更新密碼</button>
+        <p style="font-size:.8rem;color:#94a3b8;margin-top:8px">
+            新密碼只保存在這台電腦的本機設定檔，不會推送到 GitHub。
+        </p>
+    </div>
+
     <!-- 照片管理 -->
     <div class="card">
         <h2><span class="icon">&#128247;</span> 個人照片</h2>
@@ -710,6 +778,40 @@ async function uploadPhoto() {
     }
 }
 
+async function changePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    if (!currentPassword || !newPassword) {
+        showStatus('請輸入目前密碼與新密碼。', 'error');
+        return;
+    }
+    if (newPassword.length < 4) {
+        showStatus('新密碼至少需要 4 個字元。', 'error');
+        return;
+    }
+    try {
+        const resp = await fetch('api/password', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+        });
+        const result = await resp.json();
+        if (result.success) {
+            showStatus(result.message, 'success', 2500);
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showStatus(result.message || '密碼更新失敗', 'error');
+        }
+    } catch(e) {
+        showStatus('密碼更新失敗: ' + e.message, 'error');
+    }
+}
+
 async function logout() {
     await fetch('api/logout', { method: 'POST' });
     window.location.reload();
@@ -747,12 +849,8 @@ def get_tailscale_ip():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="網站後台管理伺服器")
     parser.add_argument("--port", type=int, default=DEFAULT_PORT, help=f"伺服器 port（預設 {DEFAULT_PORT}）")
-    parser.add_argument("--password", type=str, default=DEFAULT_PASSWORD, help="管理密碼")
+    parser.add_argument("--password", type=str, default=default_password(), help="管理密碼")
     args = parser.parse_args()
-
-    if not args.password:
-        args.password = secrets.token_urlsafe(32)
-        print("  ⚠️ WEBSITE_ADMIN_PASSWORD 未設定，已產生本次程序專用的臨時密碼。")
 
     AdminHandler.password = args.password
 
@@ -765,7 +863,7 @@ if __name__ == "__main__":
     if ts_ip:
         print(f"  Tailscale:    http://{ts_ip}:{args.port}")
         print(f"  Tailscale:    http://aimac-mini:{args.port}")
-    print(f"  管理密碼:     {args.password}")
+    print("  管理密碼:     已設定（可登入後在 MAGI 密碼區修改）")
     print(f"  網站目錄:     {REPO_ROOT}")
     print("=" * 50)
     print("  按 Ctrl+C 停止伺服器\n")

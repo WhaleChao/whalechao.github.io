@@ -208,7 +208,7 @@ def search_fjud(session):
                             title = _strip_html(tds[1])
                             title = re.sub(r"（\d+K）$", "", title).strip()
                             reason = _strip_html(tds[-1])
-                            if reason and reason != "裁判案由" and len(reason) < 40:
+                            if reason != "裁判案由" and len(reason) < 40:
                                 row_items.append({"title": title, "reason": reason})
 
                     sys.stdout.write(f"\r  抓取案由: 第 {page}/{pages_to_fetch} 頁 ({len(row_items)} 筆)")
