@@ -46,7 +46,7 @@ async function loadSiteData() {
         if (!response.ok) throw new Error('Data not found');
         const data = await response.json();
         renderStats(data.stats);
-        renderCaseCategories(data.caseCategories);
+        renderCaseCategories(data.caseCategories, data.stats);
         renderCases(data.cases);
         renderCourts(data.courts);
         renderNews(data.news);
@@ -85,14 +85,14 @@ function animateNumber(el, target) {
 }
 
 // --- Case categories ---
-function renderCaseCategories(cats) {
+function renderCaseCategories(cats, stats) {
     if (!cats) return;
     const mapping = { '民事': 'catCivil', '刑事': 'catCriminal', '行政': 'catAdmin', '憲法': 'catConst' };
     Object.entries(mapping).forEach(([key, elId]) => {
         const el = document.getElementById(elId);
         if (el && cats[key] !== undefined) animateNumber(el, cats[key]);
     });
-    const total = Object.values(cats).reduce((s, v) => s + v, 0);
+    const total = Number(stats?.totalCases || 0) || Object.values(cats).reduce((s, v) => s + v, 0);
     const subtitle = document.getElementById('casesSubtitle');
     if (subtitle && total > 0) {
         subtitle.textContent = `司法院裁判書系統公開判決統計，共 ${total.toLocaleString()} 筆`;

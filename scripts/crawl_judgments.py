@@ -12,6 +12,7 @@ SSL 修正：Python 3.14 + OpenSSL 3.x 對 judicial.gov.tw 的 SKI 檢查過嚴�
 """
 
 import argparse
+import html
 import json
 import os
 import re
@@ -36,6 +37,63 @@ DATA_FILE = REPO_ROOT / "data" / "site-data.json"
 LAWYER_NAME = "喬政翔"
 
 FJUD_BASE = "https://judgment.judicial.gov.tw/FJUD"
+
+
+def _strip_html(value):
+    text = re.sub(r"<[^>]+>", "", value or "")
+    return html.unescape(text).strip()
+
+
+def _absolute_fjud_url(url):
+    url = html.unescape(url or "")
+    if url.startswith("http"):
+        return url
+    if url.startswith("/FJUD/"):
+        return "https://judgment.judicial.gov.tw" + url
+    if url.startswith("/"):
+        return "https://judgment.judicial.gov.tw" + url
+    return f"{FJUD_BASE}/{url.lstrip('/')}"
+
+
+def _extract_iframe_src(text):
+    match = re.search(r'<iframe[^>]*\bsrc="([^"]+)"[^>]*\bid="iframe-data"', text, re.I)
+    if not match:
+        match = re.search(r'<iframe[^>]*\bid="iframe-data"[^>]*\bsrc="([^"]+)"', text, re.I)
+    return _absolute_fjud_url(match.group(1)) if match else ""
+
+
+def _classify_title(title, reason):
+    text = f"{title} {reason}"
+    if "憲法" in text or "憲法法庭" in text:
+        return "憲法"
+    if "行政" in text:
+        return "行政"
+    if "刑事" in text:
+        return "刑事"
+    if "民事" in text:
+        return "民事"
+    criminal_keywords = [
+        "罪", "毒品", "竊盜", "詐欺", "傷害", "殺人", "妨害", "恐嚇",
+        "侵占", "偽造", "洗錢", "公共危險", "過失", "國民法官", "假釋",
+        "強盜", "搶奪", "性自主", "酒駕",
+    ]
+    admin_keywords = ["訴願", "裁決", "國家賠償", "公民投票"]
+    if any(kw in text for kw in criminal_keywords):
+        return "刑事"
+    if any(kw in text for kw in admin_keywords):
+        return "行政"
+    return "民事"
+
+
+def _extract_court(title):
+    match = re.match(r"(.+?)\s+\d+\s+年度", title or "")
+    if match:
+        return match.group(1).strip()
+    for suffix in ("法院", "法庭"):
+        idx = (title or "").find(suffix)
+        if idx >= 0:
+            return title[: idx + len(suffix)].strip()
+    return ""
 
 
 class RelaxedSSLAdapter(HTTPAdapter):
@@ -94,8 +152,8 @@ def search_fjud(session):
         "__EVENTVALIDATION": ev.group(1) if ev else "",
         "txtKW": LAWYER_NAME,
         "judtype": "JUDBOOK",
-        "whosType": "0",
-        "btnSimpleQry": "送出查詢",
+        "whosub": "0",
+        "ctl00$cp_content$btnSimpleQry": "送出查詢",
     }
 
     r1 = session.post(
@@ -106,9 +164,6 @@ def search_fjud(session):
     )
     print(f"  搜尋結果: {r1.status_code}")
 
-    # Step 3: 取得結果頁
-    r2 = session.get(f"{FJUD_BASE}/qryresult.aspx", timeout=15)
-
     # 解析分類統計（從側邊欄 panel）
     result = {
         "total": 0,
@@ -118,41 +173,26 @@ def search_fjud(session):
     }
 
     # 總筆數
-    total_match = re.search(r"共\s*(\d+)\s*筆", r2.text)
+    total_match = re.search(r"共\s*(\d+)\s*筆", r1.text)
+    if not total_match:
+        total_match = re.search(r'id="result-count".*?<span[^>]*class="badge"[^>]*>\s*(\d+)\s*</span>', r1.text, re.S)
     if total_match:
         result["total"] = int(total_match.group(1))
         print(f"  找到 {result['total']} 筆判決")
 
-    # 案件類別（民事/刑事/行政/憲法）
-    cat_pattern = r'<a[^>]*>(.*?)<span[^>]*class="badge"[^>]*>(\d+)</span>'
-    for match in re.finditer(cat_pattern, r2.text, re.DOTALL):
-        name = re.sub(r"<[^>]+>", "", match.group(1)).strip().lstrip("»").strip()
-        count = int(match.group(2))
-        if name in ("民事", "刑事", "行政", "憲法"):
-            result["categories"][name] = count
-        elif not any(c in name for c in ["民國", "年"]):
-            # 法院名稱
-            result["courts"][name] = count
-
-    print(f"  類別: {result['categories']}")
-    print(f"  法院: {len(result['courts'])} 個")
-
     # 從結果頁面取得案由（如果有 iframe）
     # 嘗試直接取得 iframe 的內容
-    iframe_match = re.search(r'<iframe[^>]*id="iframe-data"[^>]*src="([^"]*)"', r2.text)
-    if iframe_match:
-        iframe_src = iframe_match.group(1)
-        if not iframe_src.startswith("http"):
-            iframe_src = f"{FJUD_BASE}/{iframe_src}"
+    iframe_src = _extract_iframe_src(r1.text)
+    if iframe_src:
 
         # 抓取多頁案由
-        all_reasons = []
+        row_items = []
         pages_to_fetch = min(24, (result["total"] // 20) + 1)
 
         for page in range(1, pages_to_fetch + 1):
             try:
-                page_url = re.sub(r'page=\d+', f'page={page}', iframe_src)
-                if 'page=' not in page_url:
+                page_url = re.sub(r'([?&])page=\d+', rf'\1page={page}', iframe_src, flags=re.I)
+                if 'page=' not in page_url.lower():
                     sep = '&' if '?' in page_url else '?'
                     page_url += f'{sep}page={page}'
 
@@ -161,47 +201,54 @@ def search_fjud(session):
                     # 提取案由（最後一個 td）
                     rows = re.findall(r'<tr[^>]*>(.*?)</tr>', rp.text, re.DOTALL)
                     for row in rows:
+                        if "data.aspx" not in row:
+                            continue
                         tds = re.findall(r'<td[^>]*>(.*?)</td>', row, re.DOTALL)
                         if len(tds) >= 3:
-                            reason = re.sub(r'<[^>]+>', '', tds[-1]).strip()
+                            title = _strip_html(tds[1])
+                            title = re.sub(r"（\d+K）$", "", title).strip()
+                            reason = _strip_html(tds[-1])
                             if reason and reason != "裁判案由" and len(reason) < 40:
-                                all_reasons.append(reason)
+                                row_items.append({"title": title, "reason": reason})
 
-                    sys.stdout.write(f"\r  抓取案由: 第 {page}/{pages_to_fetch} 頁 ({len(all_reasons)} 筆)")
+                    sys.stdout.write(f"\r  抓取案由: 第 {page}/{pages_to_fetch} 頁 ({len(row_items)} 筆)")
                     sys.stdout.flush()
-                    time.sleep(0.5)  # 避免請求過快
+                    time.sleep(0.3)  # 避免請求過快
             except Exception as e:
                 print(f"\n  第 {page} 頁失敗: {e}")
                 continue
 
         print()  # 換行
 
-        if all_reasons:
+        if row_items:
             # 過濾非案由項目
             skip_reasons = {"訴訟救助", "聲請復權", ""}
-            filtered = [r for r in all_reasons if r not in skip_reasons]
+            filtered = [item for item in row_items if item["reason"] not in skip_reasons]
 
-            counter = Counter(filtered)
+            reason_counter = Counter(item["reason"] for item in filtered)
+            reason_category = {}
+            category_counter = Counter()
+            court_counter = Counter()
+            for item in row_items:
+                category = _classify_title(item["title"], item["reason"])
+                reason_category.setdefault(item["reason"], category)
+                category_counter[category] += 1
+                court = _extract_court(item["title"])
+                if court:
+                    court_counter[court] += 1
 
-            # 為每個案由判斷分類
-            criminal_keywords = ["罪", "毒品", "竊盜", "詐欺", "傷害", "殺人", "妨害", "恐嚇",
-                               "侵占", "偽造", "洗錢", "公共危險", "過失", "國民法官", "假釋",
-                               "強盜", "搶奪", "性自主", "酒駕"]
-            admin_keywords = ["行政", "訴願", "裁決", "國家賠償", "公民投票"]
-
-            def classify(reason):
-                for kw in criminal_keywords:
-                    if kw in reason:
-                        return "刑事"
-                for kw in admin_keywords:
-                    if kw in reason:
-                        return "行政"
-                return "民事"
+            if category_counter:
+                result["categories"] = dict(category_counter)
+            if court_counter:
+                result["courts"] = dict(court_counter)
 
             result["cases"] = [
-                {"type": t, "count": c, "category": classify(t)}
-                for t, c in counter.most_common()
+                {"type": t, "count": c, "category": reason_category.get(t, "民事")}
+                for t, c in reason_counter.most_common()
             ]
+
+    print(f"  類別: {result['categories']}")
+    print(f"  法院: {len(result['courts'])} 個")
 
     return result
 
