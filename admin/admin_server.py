@@ -4,8 +4,8 @@
 支援本地 + Tailscale 遠端存取，含密碼驗證
 
 使用方式：
-    python3 admin_server.py                    # 預設密碼 whalelawyer
-    python3 admin_server.py --password 你的密碼  # 自訂密碼
+    WEBSITE_ADMIN_PASSWORD=你的密碼 python3 admin_server.py
+    python3 admin_server.py --password 你的密碼  # 自訂密碼（不建議用於常駐程序，會出現在 ps）
     python3 admin_server.py --port 9090         # 自訂 port
 
 存取方式：
@@ -34,7 +34,7 @@ ASSETS_DIR = REPO_ROOT / "assets"
 
 # 預設設定
 DEFAULT_PORT = 8088
-DEFAULT_PASSWORD = "whalelawyer"
+DEFAULT_PASSWORD = os.environ.get("WEBSITE_ADMIN_PASSWORD", "")
 
 # Session token store
 VALID_TOKENS = set()
@@ -749,6 +749,10 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=DEFAULT_PORT, help=f"伺服器 port（預設 {DEFAULT_PORT}）")
     parser.add_argument("--password", type=str, default=DEFAULT_PASSWORD, help="管理密碼")
     args = parser.parse_args()
+
+    if not args.password:
+        args.password = secrets.token_urlsafe(32)
+        print("  ⚠️ WEBSITE_ADMIN_PASSWORD 未設定，已產生本次程序專用的臨時密碼。")
 
     AdminHandler.password = args.password
 
