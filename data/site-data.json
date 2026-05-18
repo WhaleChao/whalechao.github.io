@@ -748,6 +748,6 @@
         "ok": false,
         "source": "司法院裁判書系統",
         "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by NameResolutionError(\"HTTPSConnection(host='judgment.judicial.gov.tw', port=443): Failed to resolve 'judgment.judicial.gov.tw' ([Errno -3] Temporary failure in name resolution)",
-        "checkedAt": "2026-05-17T22:54:13.886812+08:00"
+        "checkedAt": "2026-05-19T00:46:21.798929+08:00"
     }
 }
