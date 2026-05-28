@@ -1,5 +1,5 @@
 {
-    "lastUpdated": "2026-05-28T01:17:42.408891+08:00",
+    "lastUpdated": "2026-05-29T01:33:21.885453+08:00",
     "stats": {
         "totalCases": 484,
         "legalAidCases": 230,
@@ -737,6 +737,6 @@
     "judgmentUpdateStatus": {
         "ok": true,
         "source": "司法院裁判書系統",
-        "checkedAt": "2026-05-28T01:18:01.145424+08:00"
+        "checkedAt": "2026-05-29T01:33:47.718242+08:00"
     }
 }
