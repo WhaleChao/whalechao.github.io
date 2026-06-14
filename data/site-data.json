@@ -1,5 +1,5 @@
 {
-    "lastUpdated": "2026-06-13T00:42:45.347367+08:00",
+    "lastUpdated": "2026-06-14T23:47:35.009829+08:00",
     "stats": {
         "totalCases": 489,
         "legalAidCases": 230,
@@ -735,9 +735,8 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": false,
+        "ok": true,
         "source": "司法院裁判書系統",
-        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by NameResolutionError(\"HTTPSConnection(host='judgment.judicial.gov.tw', port=443): Failed to resolve 'judgment.judicial.gov.tw' ([Errno -3] Temporary failure in name resolution)",
-        "checkedAt": "2026-06-13T23:41:42.834418+08:00"
+        "checkedAt": "2026-06-14T23:48:04.533009+08:00"
     }
 }
