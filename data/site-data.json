@@ -1,15 +1,15 @@
 {
-    "lastUpdated": "2026-06-14T23:47:35.009829+08:00",
+    "lastUpdated": "2026-06-17T02:25:56.091030+08:00",
     "stats": {
-        "totalCases": 489,
+        "totalCases": 490,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
         "articles": 0
     },
     "caseCategories": {
-        "民事": 252,
-        "刑事": 211,
+        "民事": 253,
+        "刑事": 210,
         "行政": 16,
         "憲法": 1
     },
@@ -31,7 +31,7 @@
         },
         {
             "type": "聲請更生程序",
-            "count": 17,
+            "count": 18,
             "category": "民事"
         },
         {
@@ -100,11 +100,6 @@
             "category": "刑事"
         },
         {
-            "type": "聲請承受訴訟",
-            "count": 5,
-            "category": "刑事"
-        },
-        {
             "type": "強盜等",
             "count": 4,
             "category": "刑事"
@@ -143,6 +138,11 @@
             "type": "返還不當得利等",
             "count": 4,
             "category": "民事"
+        },
+        {
+            "type": "聲請承受訴訟",
+            "count": 4,
+            "category": "刑事"
         },
         {
             "type": "殺人等",
@@ -701,9 +701,9 @@
         }
     ],
     "courts": {
+        "臺灣宜蘭地方法院": 27,
         "臺灣花蓮地方法院": 29,
-        "臺灣宜蘭地方法院": 26,
-        "臺灣臺北地方法院": 101,
+        "臺灣臺北地方法院": 100,
         "臺灣基隆地方法院": 31,
         "臺灣高等法院": 66,
         "臺北高等行政法院 高等庭": 7,
@@ -735,9 +735,8 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": false,
+        "ok": true,
         "source": "司法院裁判書系統",
-        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by NameResolutionError(\"HTTPSConnection(host='judgment.judicial.gov.tw', port=443): Failed to resolve 'judgment.judicial.gov.tw' ([Errno -3] Temporary failure in name resolution)",
-        "checkedAt": "2026-06-16T02:23:06.894356+08:00"
+        "checkedAt": "2026-06-17T02:26:28.462775+08:00"
     }
 }
