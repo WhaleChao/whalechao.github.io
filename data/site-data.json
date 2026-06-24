@@ -1,15 +1,15 @@
 {
-    "lastUpdated": "2026-06-23T02:10:57.344234+08:00",
+    "lastUpdated": "2026-06-25T00:18:28.518752+08:00",
     "stats": {
-        "totalCases": 491,
+        "totalCases": 492,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
         "articles": 0
     },
     "caseCategories": {
-        "刑事": 210,
-        "民事": 253,
+        "民事": 254,
+        "刑事": 209,
         "行政": 16,
         "憲法": 1
     },
@@ -100,6 +100,11 @@
             "category": "刑事"
         },
         {
+            "type": "聲請免責",
+            "count": 4,
+            "category": "民事"
+        },
+        {
             "type": "強盜等",
             "count": 4,
             "category": "刑事"
@@ -170,11 +175,6 @@
             "category": "刑事"
         },
         {
-            "type": "聲請免責",
-            "count": 3,
-            "category": "民事"
-        },
-        {
             "type": "監獄行刑法",
             "count": 3,
             "category": "行政"
@@ -196,11 +196,6 @@
         },
         {
             "type": "殺人未遂等",
-            "count": 3,
-            "category": "刑事"
-        },
-        {
-            "type": "聲請承受訴訟",
             "count": 3,
             "category": "刑事"
         },
@@ -371,6 +366,11 @@
         },
         {
             "type": "偽造文書等",
+            "count": 2,
+            "category": "刑事"
+        },
+        {
+            "type": "聲請承受訴訟",
             "count": 2,
             "category": "刑事"
         },
@@ -701,14 +701,14 @@
         }
     ],
     "courts": {
+        "臺灣新北地方法院": 85,
         "臺灣臺東地方法院": 4,
         "臺灣宜蘭地方法院": 27,
         "臺灣花蓮地方法院": 29,
-        "臺灣臺北地方法院": 99,
+        "臺灣臺北地方法院": 98,
         "臺灣基隆地方法院": 31,
         "臺灣高等法院": 66,
         "臺北高等行政法院 高等庭": 7,
-        "臺灣新北地方法院": 84,
         "憲法法庭": 1,
         "臺灣士林地方法院": 59,
         "臺灣高等法院 花蓮分院": 2,
@@ -735,9 +735,8 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": false,
+        "ok": true,
         "source": "司法院裁判書系統",
-        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by NameResolutionError(\"HTTPSConnection(host='judgment.judicial.gov.tw', port=443): Failed to resolve 'judgment.judicial.gov.tw' ([Errno -3] Temporary failure in name resolution)",
-        "checkedAt": "2026-06-24T00:25:53.164212+08:00"
+        "checkedAt": "2026-06-25T00:18:47.678986+08:00"
     }
 }
