@@ -1,17 +1,17 @@
 {
-    "lastUpdated": "2026-07-08T00:27:49.771145+08:00",
+    "lastUpdated": "2026-07-10T00:25:19.359425+08:00",
     "stats": {
-        "totalCases": 495,
+        "totalCases": 496,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
         "articles": 0
     },
     "caseCategories": {
-        "民事": 256,
+        "民事": 255,
+        "憲法": 2,
         "刑事": 207,
-        "行政": 16,
-        "憲法": 1
+        "行政": 16
     },
     "cases": [
         {
@@ -190,11 +190,6 @@
             "category": "刑事"
         },
         {
-            "type": "國家賠償",
-            "count": 3,
-            "category": "民事"
-        },
-        {
             "type": "竊盜等",
             "count": 3,
             "category": "刑事"
@@ -296,6 +291,11 @@
         },
         {
             "type": "履行和解契約等",
+            "count": 2,
+            "category": "民事"
+        },
+        {
+            "type": "國家賠償",
             "count": 2,
             "category": "民事"
         },
@@ -696,7 +696,8 @@
         }
     ],
     "courts": {
-        "臺灣臺北地方法院": 96,
+        "臺灣臺北地方法院": 95,
+        "憲法法庭": 2,
         "臺灣新北地方法院": 85,
         "臺灣花蓮地方法院": 31,
         "臺灣臺東地方法院": 4,
@@ -704,7 +705,6 @@
         "臺灣基隆地方法院": 31,
         "臺灣高等法院": 66,
         "臺北高等行政法院 高等庭": 7,
-        "憲法法庭": 1,
         "臺灣士林地方法院": 59,
         "臺灣高等法院 花蓮分院": 2,
         "高雄高等行政法院 地方庭": 4,
@@ -730,9 +730,8 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": false,
+        "ok": true,
         "source": "司法院裁判書系統",
-        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by NameResolutionError(\"HTTPSConnection(host='judgment.judicial.gov.tw', port=443): Failed to resolve 'judgment.judicial.gov.tw' ([Errno -3] Temporary failure in name resolution)",
-        "checkedAt": "2026-07-09T00:01:00.269837+08:00"
+        "checkedAt": "2026-07-10T00:25:43.536563+08:00"
     }
 }
