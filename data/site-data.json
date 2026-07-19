@@ -1,16 +1,16 @@
 {
-    "lastUpdated": "2026-07-17T23:10:42.494573+08:00",
+    "lastUpdated": "2026-07-19T22:52:21.311443+08:00",
     "stats": {
-        "totalCases": 499,
+        "totalCases": 500,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
         "articles": 0
     },
     "caseCategories": {
+        "刑事": 206,
         "民事": 255,
         "行政": 17,
-        "刑事": 206,
         "憲法": 2
     },
     "cases": [
@@ -105,6 +105,11 @@
             "category": "刑事"
         },
         {
+            "type": "過失傷害",
+            "count": 4,
+            "category": "刑事"
+        },
+        {
             "type": "聲請免責",
             "count": 4,
             "category": "民事"
@@ -146,11 +151,6 @@
         },
         {
             "type": "傷害",
-            "count": 3,
-            "category": "刑事"
-        },
-        {
-            "type": "過失傷害",
             "count": 3,
             "category": "刑事"
         },
@@ -683,14 +683,10 @@
             "type": "清償債務",
             "count": 1,
             "category": "民事"
-        },
-        {
-            "type": "妨害秘密罪",
-            "count": 1,
-            "category": "刑事"
         }
     ],
     "courts": {
+        "臺灣高等法院 花蓮分院": 3,
         "臺灣宜蘭地方法院": 29,
         "高雄高等行政法院 地方庭": 5,
         "臺灣臺北地方法院": 95,
@@ -702,7 +698,6 @@
         "臺灣高等法院": 64,
         "臺北高等行政法院 高等庭": 7,
         "臺灣士林地方法院": 59,
-        "臺灣高等法院 花蓮分院": 2,
         "臺北高等行政法院 地方庭": 1,
         "臺灣新竹地方法院": 6,
         "最高法院": 29,
@@ -713,7 +708,7 @@
         "臺北高等行政法院": 3,
         "臺灣桃園地方法院": 9,
         "臺灣嘉義地方法院": 5,
-        "智慧財產法院": 2
+        "智慧財產法院": 1
     },
     "news": [
         {
@@ -725,9 +720,8 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": false,
+        "ok": true,
         "source": "司法院裁判書系統",
-        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by NameResolutionError(\"HTTPSConnection(host='judgment.judicial.gov.tw', port=443): Failed to resolve 'judgment.judicial.gov.tw' ([Errno -3] Temporary failure in name resolution)",
-        "checkedAt": "2026-07-18T22:49:12.874478+08:00"
+        "checkedAt": "2026-07-19T22:52:45.673522+08:00"
     }
 }
