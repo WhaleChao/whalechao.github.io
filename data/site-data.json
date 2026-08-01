@@ -1,15 +1,15 @@
 {
-    "lastUpdated": "2026-07-29T23:47:25.397201+08:00",
+    "lastUpdated": "2026-08-01T22:57:35.964157+08:00",
     "stats": {
-        "totalCases": 504,
+        "totalCases": 508,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
         "articles": 0
     },
     "caseCategories": {
-        "民事": 255,
-        "刑事": 206,
+        "刑事": 208,
+        "民事": 253,
         "行政": 17,
         "憲法": 2
     },
@@ -100,6 +100,11 @@
             "category": "刑事"
         },
         {
+            "type": "殺人等",
+            "count": 4,
+            "category": "刑事"
+        },
+        {
             "type": "過失傷害",
             "count": 4,
             "category": "刑事"
@@ -150,16 +155,6 @@
             "category": "民事"
         },
         {
-            "type": "傷害",
-            "count": 3,
-            "category": "刑事"
-        },
-        {
-            "type": "殺人等",
-            "count": 3,
-            "category": "刑事"
-        },
-        {
             "type": "返還土地等",
             "count": 3,
             "category": "民事"
@@ -197,6 +192,16 @@
         {
             "type": "竊盜等",
             "count": 3,
+            "category": "刑事"
+        },
+        {
+            "type": "違反公職人員選舉罷免法",
+            "count": 2,
+            "category": "刑事"
+        },
+        {
+            "type": "傷害",
+            "count": 2,
             "category": "刑事"
         },
         {
@@ -360,8 +365,8 @@
             "category": "民事"
         },
         {
-            "type": "重傷害等",
-            "count": 2,
+            "type": "聲請撤銷羈押處分",
+            "count": 1,
             "category": "刑事"
         },
         {
@@ -675,32 +680,27 @@
             "category": "民事"
         },
         {
-            "type": "請求清償債務",
+            "type": "重傷害等",
             "count": 1,
-            "category": "民事"
-        },
-        {
-            "type": "辭任遺產管理人等",
-            "count": 1,
-            "category": "民事"
+            "category": "刑事"
         }
     ],
     "courts": {
+        "臺灣花蓮地方法院": 33,
+        "臺灣高等法院 花蓮分院": 5,
         "臺灣士林地方法院": 59,
-        "臺灣高等法院 花蓮分院": 3,
+        "臺灣高等法院": 63,
         "臺灣宜蘭地方法院": 29,
         "高雄高等行政法院 地方庭": 5,
         "臺灣臺東地方法院": 5,
-        "臺灣臺北地方法院": 95,
+        "臺灣臺北地方法院": 93,
         "憲法法庭": 2,
-        "臺灣新北地方法院": 85,
-        "臺灣花蓮地方法院": 32,
+        "臺灣新北地方法院": 84,
         "臺灣基隆地方法院": 31,
-        "臺灣高等法院": 62,
         "臺北高等行政法院 高等庭": 7,
         "臺北高等行政法院 地方庭": 1,
         "臺灣新竹地方法院": 6,
-        "最高法院": 29,
+        "最高法院": 28,
         "高雄高等行政法院 高等庭": 1,
         "臺灣高等法院 臺南分院": 8,
         "臺灣高等法院 高雄分院": 1,
@@ -720,9 +720,8 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": false,
+        "ok": true,
         "source": "司法院裁判書系統",
-        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by NameResolutionError(\"HTTPSConnection(host='judgment.judicial.gov.tw', port=443): Failed to resolve 'judgment.judicial.gov.tw' ([Errno -3] Temporary failure in name resolution)",
-        "checkedAt": "2026-08-01T00:00:08.570481+08:00"
+        "checkedAt": "2026-08-01T22:57:54.510869+08:00"
     }
 }
