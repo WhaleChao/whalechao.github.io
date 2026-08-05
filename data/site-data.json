@@ -1,15 +1,15 @@
 {
-    "lastUpdated": "2026-08-02T22:59:17.033308+08:00",
+    "lastUpdated": "2026-08-05T23:59:40.876190+08:00",
     "stats": {
-        "totalCases": 508,
+        "totalCases": 509,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
         "articles": 0
     },
     "caseCategories": {
-        "刑事": 208,
-        "民事": 253,
+        "刑事": 209,
+        "民事": 252,
         "行政": 17,
         "憲法": 2
     },
@@ -125,11 +125,6 @@
             "category": "刑事"
         },
         {
-            "type": "損害賠償等",
-            "count": 4,
-            "category": "民事"
-        },
-        {
             "type": "返還不當得利",
             "count": 4,
             "category": "民事"
@@ -185,6 +180,11 @@
             "category": "民事"
         },
         {
+            "type": "損害賠償等",
+            "count": 3,
+            "category": "民事"
+        },
+        {
             "type": "殺人未遂",
             "count": 3,
             "category": "刑事"
@@ -192,6 +192,11 @@
         {
             "type": "竊盜等",
             "count": 3,
+            "category": "刑事"
+        },
+        {
+            "type": "妨害秩序",
+            "count": 2,
             "category": "刑事"
         },
         {
@@ -416,11 +421,6 @@
         },
         {
             "type": "強盜殺人聲請再審及停止刑罰執行",
-            "count": 1,
-            "category": "刑事"
-        },
-        {
-            "type": "妨害秩序",
             "count": 1,
             "category": "刑事"
         },
@@ -687,9 +687,9 @@
     ],
     "courts": {
         "臺灣花蓮地方法院": 33,
-        "臺灣高等法院 花蓮分院": 5,
+        "臺灣高等法院 花蓮分院": 6,
         "臺灣士林地方法院": 59,
-        "臺灣高等法院": 63,
+        "臺灣高等法院": 62,
         "臺灣宜蘭地方法院": 29,
         "高雄高等行政法院 地方庭": 5,
         "臺灣臺東地方法院": 5,
@@ -720,9 +720,8 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": false,
+        "ok": true,
         "source": "司法院裁判書系統",
-        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by NameResolutionError(\"HTTPSConnection(host='judgment.judicial.gov.tw', port=443): Failed to resolve 'judgment.judicial.gov.tw' ([Errno -3] Temporary failure in name resolution)",
-        "checkedAt": "2026-08-05T00:09:39.525655+08:00"
+        "checkedAt": "2026-08-06T00:00:02.412624+08:00"
     }
 }
