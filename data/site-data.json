@@ -1,7 +1,7 @@
 {
-    "lastUpdated": "2026-08-10T22:54:20.969142+08:00",
+    "lastUpdated": "2026-08-11T22:54:13.054709+08:00",
     "stats": {
-        "totalCases": 509,
+        "totalCases": 510,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
@@ -145,6 +145,11 @@
             "category": "民事"
         },
         {
+            "type": "聲請訴訟參與",
+            "count": 3,
+            "category": "刑事"
+        },
+        {
             "type": "更生之執行",
             "count": 3,
             "category": "民事"
@@ -206,11 +211,6 @@
         },
         {
             "type": "傷害",
-            "count": 2,
-            "category": "刑事"
-        },
-        {
-            "type": "聲請訴訟參與",
             "count": 2,
             "category": "刑事"
         },
@@ -356,11 +356,6 @@
         },
         {
             "type": "侵占",
-            "count": 2,
-            "category": "刑事"
-        },
-        {
-            "type": "殺人未遂等",
             "count": 2,
             "category": "刑事"
         },
@@ -660,6 +655,11 @@
             "category": "刑事"
         },
         {
+            "type": "殺人未遂等",
+            "count": 1,
+            "category": "刑事"
+        },
+        {
             "type": "強盜",
             "count": 1,
             "category": "刑事"
@@ -686,10 +686,10 @@
         }
     ],
     "courts": {
+        "臺灣高等法院": 62,
         "臺灣花蓮地方法院": 33,
         "臺灣高等法院 花蓮分院": 6,
         "臺灣士林地方法院": 59,
-        "臺灣高等法院": 62,
         "臺灣宜蘭地方法院": 29,
         "高雄高等行政法院 地方庭": 5,
         "臺灣臺東地方法院": 5,
@@ -722,6 +722,6 @@
     "judgmentUpdateStatus": {
         "ok": true,
         "source": "司法院裁判書系統",
-        "checkedAt": "2026-08-10T22:54:56.404693+08:00"
+        "checkedAt": "2026-08-11T22:54:34.432935+08:00"
     }
 }
