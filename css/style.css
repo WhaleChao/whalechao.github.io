@@ -531,22 +531,59 @@ a { color: inherit; text-decoration: none; }
 }
 
 .record-types { margin-top: clamp(40px, 6vw, 72px); }
-.cases-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-.case-tag {
-    display: inline-flex;
+.cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: clamp(24px, 3vw, 40px);
+}
+.case-group-title {
+    display: flex;
+    justify-content: space-between;
     align-items: baseline;
-    gap: 8px;
-    padding: 5px 14px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--card);
-    font-size: 0.9rem;
+    gap: 12px;
+    padding-bottom: 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--line-strong);
+    font-family: var(--serif);
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+.case-group-total {
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--brass);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+.case-rank { list-style: none; margin: 0; padding: 0; }
+.case-rank-item {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0 9px;
+    border-bottom: 1px dotted var(--line-strong);
+    font-size: 0.95rem;
     color: var(--ink-soft);
 }
-.case-count {
-    font-size: 0.8rem;
+/* 細比例線：同組最多者為滿格，給排名一點份量，又不搶字 */
+.case-rank-item::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: var(--w, 0%);
+    height: 2px;
+    background: var(--brass-bright);
+    opacity: 0.55;
+}
+.case-rank-name { min-width: 0; overflow-wrap: anywhere; }
+.case-rank-count {
+    flex: none;
     font-weight: 700;
-    color: var(--brass);
+    color: var(--ink);
     font-variant-numeric: tabular-nums;
 }
 .more-btn {
@@ -562,6 +599,8 @@ a { color: inherit; text-decoration: none; }
     transition: background 0.2s var(--ease), color 0.2s var(--ease);
 }
 .more-btn:hover { background: var(--ink); color: var(--paper); }
+
+::selection { background: var(--brass-bright); color: #fff; }
 
 /* ===== 報導與文章 ===== */
 .news-item, .article-item {

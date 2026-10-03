@@ -8,7 +8,6 @@
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
         document.documentElement.classList.contains('still');
     const hasIO = 'IntersectionObserver' in window;
-    const CASE_PREVIEW = 24;
 
     document.addEventListener('DOMContentLoaded', () => {
         initHeader();
@@ -216,29 +215,72 @@
     }
 
     // ---------- 常辦案由 ----------
+    // 司法院資料的案由寫法不一（「詐欺」「詐欺等」、「違反毒品危害防制條例」、
+    // 「更生事件」「聲請更生程序」…），顯示前先歸併同義案由，再依業務領域分組排名。
+    // 只整理顯示，不改 site-data.json。
+    const CASE_GROUPS = ['消費者債務清理', '刑事', '民事', '行政與憲法'];
+    const CASE_GROUP_PREVIEW = 6;
+    function normalizeCase(item) {
+        let name = String(item.type || '').trim().replace(/等$/, '').replace(/^違反/, '');
+        let group = null;
+        if (/更生/.test(name)) { name = '更生'; group = '消費者債務清理'; }
+        else if (/復權/.test(name)) { name = '復權'; group = '消費者債務清理'; }
+        else if (/清算/.test(name)) { name = '清算'; group = '消費者債務清理'; }
+        else if (/免責/.test(name)) { name = '免責'; group = '消費者債務清理'; }
+        else if (/消債|債務清理/.test(name)) {
+            group = '消費者債務清理';
+            name = name.replace(/^(消費者債務清理|消債)/, '') || name;
+        }
+        name = name.replace(/事件$/, '');
+        // 刑事案號下的「損害賠償」是刑事附帶民事訴訟
+        if (item.category === '刑事' && name === '損害賠償') name = '附帶民事損害賠償';
+        if (!group) group = item.category === '刑事' ? '刑事'
+            : item.category === '民事' ? '民事' : '行政與憲法';
+        return { name, group, count: Number(item.count) || 0 };
+    }
     function renderCases(cases) {
         const block = document.getElementById('casesBlock');
         const container = document.getElementById('casesGrid');
         if (!container || !block || !Array.isArray(cases) || cases.length === 0) return;
-        const catOrder = { '民事': 0, '刑事': 1, '行政': 2, '憲法': 3 };
-        const sorted = cases
-            .filter(c => c && c.type && !['訴訟救助', '聲請復權'].includes(c.type))
-            .sort((a, b) => (b.count || 0) - (a.count || 0) || (catOrder[a.category] ?? 9) - (catOrder[b.category] ?? 9));
-        if (!sorted.length) return;
+        const merged = new Map();
+        cases.filter(c => c && c.type && !['訴訟救助', '聲請復權'].includes(c.type)).forEach(c => {
+            const n = normalizeCase(c);
+            if (!n.name || !n.count) return;
+            const key = n.group + '\u0000' + n.name;
+            const prev = merged.get(key);
+            merged.set(key, prev ? { ...prev, count: prev.count + n.count } : n);
+        });
+        const groups = CASE_GROUPS.map(g => {
+            const items = [...merged.values()].filter(x => x.group === g).sort((x, y) => y.count - x.count);
+            return { name: g, items, total: items.reduce((s, x) => s + x.count, 0) };
+        }).filter(g => g.items.length);
+        if (!groups.length) return;
 
-        const tag = item => el('span', { class: 'case-tag' }, [
-            el('span', { text: item.type }),
-            item.count ? el('span', { class: 'case-count', text: item.count }) : null
-        ]);
-        const draw = (all) => container.replaceChildren(...(all ? sorted : sorted.slice(0, CASE_PREVIEW)).map(tag));
+        const draw = all => container.replaceChildren(...groups.map(g => {
+            const max = g.items[0].count || 1;
+            const shown = all ? g.items : g.items.slice(0, CASE_GROUP_PREVIEW);
+            return el('section', { class: 'case-group', 'aria-label': g.name }, [
+                el('h4', { class: 'case-group-title' }, [
+                    el('span', { text: g.name }),
+                    el('span', { class: 'case-group-total', text: `${g.total.toLocaleString()} 件` })
+                ]),
+                el('ol', { class: 'case-rank' }, shown.map(x =>
+                    el('li', { class: 'case-rank-item', style: `--w:${(x.count / max * 100).toFixed(1)}%` }, [
+                        el('span', { class: 'case-rank-name', text: x.name }),
+                        el('span', { class: 'case-rank-count', text: x.count.toLocaleString() })
+                    ])))
+            ]);
+        }));
         draw(false);
         block.hidden = false;
 
         block.querySelector('.more-btn')?.remove();
-        if (sorted.length > CASE_PREVIEW) {
+        const hidden = groups.reduce((s, g) => s + Math.max(0, g.items.length - CASE_GROUP_PREVIEW), 0);
+        if (hidden > 0) {
             let open = false;
-            const btn = el('button', { class: 'more-btn', type: 'button', 'aria-expanded': 'false' });
-            const label = () => btn.textContent = open ? '收合' : `顯示全部 ${sorted.length} 種案由`;
+            const total = groups.reduce((s, g) => s + g.items.length, 0);
+            const btn = el('button', { class: 'more-btn', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'casesGrid' });
+            const label = () => btn.textContent = open ? '收合' : `顯示全部 ${total} 種案由`;
             label();
             btn.addEventListener('click', () => {
                 open = !open;
