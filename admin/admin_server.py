@@ -7,11 +7,11 @@
     WEBSITE_ADMIN_PASSWORD=你的密碼 python3 admin_server.py
     python3 admin_server.py --password 你的密碼  # 自訂密碼（不建議用於常駐程序，會出現在 ps）
     python3 admin_server.py --port 9090         # 自訂 port
-    未指定密碼時使用 admin/.admin_config.json；若尚未設定，預設為 6318。
+    未指定密碼時使用 admin/.admin_config.json；若兩者都沒有設定，伺服器拒絕啟動（沒有出廠預設密碼）。
 
 存取方式：
     本地: http://localhost:8088
-    Tailscale: http://aimac-mini:8088 或 http://100.97.29.92:8088
+    Tailscale: 僅在以 --host 明確綁定非 loopback 位址時啟用（程式會印出實際位址）
 """
 
 import argparse
@@ -22,8 +22,11 @@ import os
 import secrets
 import subprocess
 import sys
+import threading
+import time
+from collections import defaultdict, deque
 from datetime import datetime, timezone, timedelta
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -36,10 +39,52 @@ ADMIN_CONFIG_FILE = Path(__file__).parent / ".admin_config.json"
 
 # 預設設定
 DEFAULT_PORT = 8088
-FACTORY_DEFAULT_PASSWORD = "6318"
+DEFAULT_HOST = "127.0.0.1"
+MIN_PASSWORD_LENGTH = 12
+LOGIN_ATTEMPT_LIMIT = 5
+LOGIN_WINDOW_SECONDS = 5 * 60
+LOGIN_LOCKOUT_SECONDS = 15 * 60
+MAX_LOGIN_BODY_BYTES = 4096
 
 # Session token store
 VALID_TOKENS = set()
+_LOGIN_FAILURES = defaultdict(deque)
+_LOGIN_LOCKED_UNTIL = {}
+_LOGIN_LOCK = threading.Lock()
+
+
+def _login_status(client_ip, now=None):
+    """Return ``(allowed, retry_after_seconds)`` for a login source."""
+    current = float(time.monotonic() if now is None else now)
+    with _LOGIN_LOCK:
+        locked_until = float(_LOGIN_LOCKED_UNTIL.get(client_ip, 0.0))
+        if locked_until > current:
+            return False, max(1, int(locked_until - current))
+        if locked_until:
+            _LOGIN_LOCKED_UNTIL.pop(client_ip, None)
+
+        failures = _LOGIN_FAILURES[client_ip]
+        cutoff = current - LOGIN_WINDOW_SECONDS
+        while failures and failures[0] < cutoff:
+            failures.popleft()
+        if len(failures) >= LOGIN_ATTEMPT_LIMIT:
+            locked_until = current + LOGIN_LOCKOUT_SECONDS
+            _LOGIN_LOCKED_UNTIL[client_ip] = locked_until
+            failures.clear()
+            return False, LOGIN_LOCKOUT_SECONDS
+        return True, 0
+
+
+def _record_login_failure(client_ip, now=None):
+    current = float(time.monotonic() if now is None else now)
+    with _LOGIN_LOCK:
+        _LOGIN_FAILURES[client_ip].append(current)
+
+
+def _clear_login_failures(client_ip):
+    with _LOGIN_LOCK:
+        _LOGIN_FAILURES.pop(client_ip, None)
+        _LOGIN_LOCKED_UNTIL.pop(client_ip, None)
 
 
 def load_json(path):
@@ -71,8 +116,8 @@ def default_password():
     env_password = os.environ.get("WEBSITE_ADMIN_PASSWORD", "")
     if env_password:
         return env_password
-    configured = str(load_admin_config().get("password") or "")
-    return configured or FACTORY_DEFAULT_PASSWORD
+    # 沒有出廠預設密碼：這份程式碼在公開的 GitHub repo 裡，任何預設值都等於公開密碼。
+    return str(load_admin_config().get("password") or "")
 
 
 def git_push(message):
@@ -153,7 +198,9 @@ class AdminHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
 
-        if parsed.path == "/login":
+        if parsed.path == "/health":
+            self.send_json({"ok": True, "service": "website-admin", "status": "live"})
+        elif parsed.path == "/login":
             self.serve_login_page()
         elif parsed.path == "/api/check-auth":
             if self.check_auth():
@@ -181,20 +228,41 @@ class AdminHandler(BaseHTTPRequestHandler):
 
         # 登入不需要 auth
         if parsed.path == "/api/login":
+            client_ip = str(self.client_address[0] or "unknown")
+            allowed, retry_after = _login_status(client_ip)
+            if not allowed:
+                self.send_json(
+                    {"success": False, "message": "登入嘗試過多，請稍後再試"},
+                    status=429,
+                    extra_headers={"Retry-After": str(retry_after)},
+                )
+                return
+            if content_length < 0 or content_length > MAX_LOGIN_BODY_BYTES:
+                self.send_json({"success": False, "message": "登入請求過大"}, status=413)
+                return
             body = self.rfile.read(content_length)
-            data = json.loads(body.decode("utf-8"))
-            if data.get("password") == self.password:
+            try:
+                data = json.loads(body.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                _record_login_failure(client_ip)
+                self.send_json({"success": False, "message": "登入資料格式錯誤"}, status=400)
+                return
+            supplied_password = str(data.get("password") or "")
+            if secrets.compare_digest(supplied_password, str(self.password)):
+                _clear_login_failures(client_ip)
                 token = secrets.token_hex(32)
                 VALID_TOKENS.add(token)
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
-                self.send_header("Set-Cookie", f"session={token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=86400")
+                secure = "; Secure" if os.environ.get("WEBSITE_ADMIN_SECURE_COOKIE", "").lower() in {"1", "true", "yes", "on"} else ""
+                self.send_header("Set-Cookie", f"session={token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=86400{secure}")
                 resp = json.dumps({"success": True}).encode()
                 self.send_header("Content-Length", len(resp))
                 self.end_headers()
                 self.wfile.write(resp)
             else:
-                self.send_json({"success": False, "message": "密碼錯誤"})
+                _record_login_failure(client_ip)
+                self.send_json({"success": False, "message": "密碼錯誤"}, status=401)
             return
 
         # 其他 API 需要認證
@@ -231,8 +299,8 @@ class AdminHandler(BaseHTTPRequestHandler):
             new_password = str(data.get("new_password") or "")
             if current_password != self.password:
                 self.send_json({"success": False, "message": "目前密碼不正確"})
-            elif len(new_password) < 4:
-                self.send_json({"success": False, "message": "新密碼至少需要 4 個字元"})
+            elif len(new_password) < MIN_PASSWORD_LENGTH:
+                self.send_json({"success": False, "message": f"新密碼至少需要 {MIN_PASSWORD_LENGTH} 個字元"})
             else:
                 config = load_admin_config()
                 config["password"] = new_password
@@ -356,10 +424,14 @@ class AdminHandler(BaseHTTPRequestHandler):
         style="width:100%;height:100vh;border:none"></iframe></body></html>"""
         self.send_html(html)
 
-    def send_json(self, data):
+    def send_json(self, data, *, status=200, extra_headers=None):
         response = json.dumps(data, ensure_ascii=False).encode("utf-8")
-        self.send_response(200)
+        self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        for name, value in (extra_headers or {}).items():
+            self.send_header(str(name), str(value))
         self.send_header("Content-Length", len(response))
         self.end_headers()
         self.wfile.write(response)
@@ -848,10 +920,19 @@ def get_tailscale_ip():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="網站後台管理伺服器")
+    parser.add_argument("--host", default=os.environ.get("WEBSITE_ADMIN_HOST", DEFAULT_HOST), help=f"綁定位址（預設 {DEFAULT_HOST}）")
     parser.add_argument("--port", type=int, default=DEFAULT_PORT, help=f"伺服器 port（預設 {DEFAULT_PORT}）")
     parser.add_argument("--password", type=str, default=default_password(), help="管理密碼")
     args = parser.parse_args()
 
+    if not args.password:
+        sys.exit(
+            "尚未設定管理密碼：請設環境變數 WEBSITE_ADMIN_PASSWORD，"
+            "或在 admin/.admin_config.json 設定 password。為避免公開 repo 內含預設密碼，不提供出廠預設值。"
+        )
+    if len(args.password) < MIN_PASSWORD_LENGTH:
+        # 既有的短密碼仍可登入（避免把使用者鎖在門外），但提醒盡快改成較長的密碼。
+        print(f"  提醒：目前管理密碼少於 {MIN_PASSWORD_LENGTH} 個字元，請登入後在 MAGI 密碼區改成較長的密碼。")
     AdminHandler.password = args.password
 
     ts_ip = get_tailscale_ip()
@@ -860,15 +941,16 @@ if __name__ == "__main__":
     print("  喬政翔律師 - 網站後台管理伺服器")
     print("=" * 50)
     print(f"  本地存取:     http://localhost:{args.port}")
-    if ts_ip:
+    if ts_ip and args.host not in {"127.0.0.1", "localhost", "::1"}:
         print(f"  Tailscale:    http://{ts_ip}:{args.port}")
-        print(f"  Tailscale:    http://aimac-mini:{args.port}")
+    elif ts_ip:
+        print("  遠端存取:     已關閉（僅綁定 loopback）")
     print("  管理密碼:     已設定（可登入後在 MAGI 密碼區修改）")
     print(f"  網站目錄:     {REPO_ROOT}")
     print("=" * 50)
     print("  按 Ctrl+C 停止伺服器\n")
 
-    server = HTTPServer(("0.0.0.0", args.port), AdminHandler)
+    server = ThreadingHTTPServer((args.host, args.port), AdminHandler)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
