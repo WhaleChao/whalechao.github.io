@@ -700,8 +700,9 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": true,
+        "ok": false,
         "source": "司法院裁判書系統",
-        "checkedAt": "2026-10-08T06:36:10.877656+08:00"
+        "error": "('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))",
+        "checkedAt": "2026-10-09T03:38:57.829324+08:00"
     }
 }
