@@ -1,22 +1,22 @@
 {
-    "lastUpdated": "2026-10-08T06:35:48.174288+08:00",
+    "lastUpdated": "2026-10-10T03:14:14.517559+08:00",
     "stats": {
-        "totalCases": 533,
+        "totalCases": 534,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
         "articles": 0
     },
     "caseCategories": {
-        "刑事": 215,
-        "民事": 244,
+        "刑事": 216,
+        "民事": 243,
         "行政": 19,
         "憲法": 2
     },
     "cases": [
         {
             "type": "更生事件",
-            "count": 82,
+            "count": 81,
             "category": "民事"
         },
         {
@@ -91,7 +91,7 @@
         },
         {
             "type": "殺人等",
-            "count": 5,
+            "count": 6,
             "category": "刑事"
         },
         {
@@ -666,13 +666,13 @@
         }
     ],
     "courts": {
-        "臺灣花蓮地方法院": 44,
+        "臺灣花蓮地方法院": 45,
         "高雄高等行政法院 地方庭": 7,
         "臺灣新北地方法院": 80,
         "臺灣高等法院": 56,
         "臺灣高等法院 花蓮分院": 12,
         "臺灣臺東地方法院": 6,
-        "臺灣士林地方法院": 54,
+        "臺灣士林地方法院": 53,
         "臺灣宜蘭地方法院": 29,
         "臺灣臺北地方法院": 91,
         "憲法法庭": 2,
@@ -700,9 +700,8 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": false,
+        "ok": true,
         "source": "司法院裁判書系統",
-        "error": "('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))",
-        "checkedAt": "2026-10-09T03:38:57.829324+08:00"
+        "checkedAt": "2026-10-10T03:14:36.253244+08:00"
     }
 }
