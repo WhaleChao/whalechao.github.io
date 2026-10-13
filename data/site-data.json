@@ -1,7 +1,7 @@
 {
-    "lastUpdated": "2026-10-13T05:57:38.470503+08:00",
+    "lastUpdated": "2026-10-14T04:03:36.360290+08:00",
     "stats": {
-        "totalCases": 534,
+        "totalCases": 535,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
@@ -80,17 +80,17 @@
             "category": "刑事"
         },
         {
-            "type": "竊盜",
-            "count": 7,
-            "category": "刑事"
-        },
-        {
             "type": "聲請更生",
             "count": 7,
             "category": "民事"
         },
         {
             "type": "殺人等",
+            "count": 6,
+            "category": "刑事"
+        },
+        {
+            "type": "竊盜",
             "count": 6,
             "category": "刑事"
         },
@@ -337,6 +337,11 @@
         {
             "type": "違反槍砲彈藥刀械管制條例等",
             "count": 2,
+            "category": "刑事"
+        },
+        {
+            "type": "家暴妨害性自主",
+            "count": 1,
             "category": "刑事"
         },
         {
@@ -666,9 +671,9 @@
         }
     ],
     "courts": {
+        "臺灣新北地方法院": 80,
         "臺灣花蓮地方法院": 45,
         "高雄高等行政法院 地方庭": 7,
-        "臺灣新北地方法院": 80,
         "臺灣高等法院": 56,
         "臺灣高等法院 花蓮分院": 12,
         "臺灣臺東地方法院": 6,
@@ -702,6 +707,6 @@
     "judgmentUpdateStatus": {
         "ok": true,
         "source": "司法院裁判書系統",
-        "checkedAt": "2026-10-13T05:58:08.068947+08:00"
+        "checkedAt": "2026-10-14T04:03:58.833275+08:00"
     }
 }
