@@ -707,7 +707,7 @@
     "judgmentUpdateStatus": {
         "ok": false,
         "source": "司法院裁判書系統",
-        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by ConnectTimeoutError(<HTTPSConnection(host='judgment.judicial.gov.tw', port=443) at 0x7ff59528d590>, 'Connection to judgment.judicial.gov.tw timed out. (connect timeout=15)'))",
-        "checkedAt": "2026-11-02T02:44:14.912205+08:00"
+        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by ConnectTimeoutError(<HTTPSConnection(host='judgment.judicial.gov.tw', port=443) at 0x7f4f8c8ed8d0>, 'Connection to judgment.judicial.gov.tw timed out. (connect timeout=15)'))",
+        "checkedAt": "2026-11-03T06:34:37.097298+08:00"
     }
 }
