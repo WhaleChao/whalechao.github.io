@@ -1,27 +1,27 @@
 {
-    "lastUpdated": "2026-10-23T02:15:24.911716+08:00",
+    "lastUpdated": "2026-11-06T04:55:14.475231+08:00",
     "stats": {
-        "totalCases": 537,
+        "totalCases": 539,
         "legalAidCases": 230,
         "yearsOfPractice": 10,
         "caseTypes": 4,
         "articles": 0
     },
     "caseCategories": {
-        "民事": 243,
-        "刑事": 216,
+        "民事": 244,
+        "刑事": 215,
         "行政": 19,
         "憲法": 2
     },
     "cases": [
         {
             "type": "更生事件",
-            "count": 80,
+            "count": 82,
             "category": "民事"
         },
         {
             "type": "清算事件",
-            "count": 42,
+            "count": 41,
             "category": "民事"
         },
         {
@@ -663,22 +663,17 @@
             "type": "傷害等",
             "count": 1,
             "category": "刑事"
-        },
-        {
-            "type": "殺人未遂等",
-            "count": 1,
-            "category": "刑事"
         }
     ],
     "courts": {
+        "臺灣新北地方法院": 81,
+        "臺灣花蓮地方法院": 47,
         "臺灣基隆地方法院": 32,
-        "臺灣新北地方法院": 80,
-        "臺灣花蓮地方法院": 46,
         "高雄高等行政法院 地方庭": 7,
-        "臺灣高等法院": 56,
+        "臺灣高等法院": 55,
         "臺灣高等法院 花蓮分院": 12,
         "臺灣臺東地方法院": 6,
-        "臺灣士林地方法院": 52,
+        "臺灣士林地方法院": 51,
         "臺灣宜蘭地方法院": 29,
         "臺灣臺北地方法院": 90,
         "憲法法庭": 2,
@@ -705,9 +700,8 @@
     ],
     "articles": [],
     "judgmentUpdateStatus": {
-        "ok": false,
+        "ok": true,
         "source": "司法院裁判書系統",
-        "error": "HTTPSConnectionPool(host='judgment.judicial.gov.tw', port=443): Max retries exceeded with url: /FJUD/default.aspx (Caused by ConnectTimeoutError(<HTTPSConnection(host='judgment.judicial.gov.tw', port=443) at 0x7f4b02108450>, 'Connection to judgment.judicial.gov.tw timed out. (connect timeout=15)'))",
-        "checkedAt": "2026-11-05T04:39:27.634933+08:00"
+        "checkedAt": "2026-11-06T04:55:36.122001+08:00"
     }
 }
